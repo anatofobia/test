@@ -1,0 +1,5 @@
+pyrofork==2.3.69
+TgCrypto
+tonnelmp>=1.2
+python-dotenv
+requests

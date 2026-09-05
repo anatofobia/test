@@ -1,0 +1,1002 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль - Getgems{% endblock %}
+
+{% block styles %}
+<style>
+    .profile-header {
+        padding: 32px 20px 28px;
+        text-align: center;
+        animation: fadeIn 0.6s ease;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .profile-avatar {
+        width: 110px;
+        height: 110px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3),
+                    0 0 0 1px rgba(0, 122, 255, 0.1) inset;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: scaleIn 0.5s ease;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 32px rgba(0, 122, 255, 0.4),
+                    0 0 0 1px rgba(0, 122, 255, 0.2) inset;
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .profile-title {
+        font-size: 30px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        color: #ffffff;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-username {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 0 16px;
+        margin-bottom: 32px;
+        animation: slideUp 0.6s ease;
+    }
+
+    .stat-card {
+        padding: 22px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(30px) saturate(150%);
+        -webkit-backdrop-filter: blur(30px) saturate(150%);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (min-width: 768px) {
+        .stats-grid {
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        margin-bottom: 6px;
+        letter-spacing: -1px;
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 11px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .settings-section {
+        padding: 0 16px;
+        margin-bottom: 24px;
+        animation: fadeIn 0.8s ease;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    @media (min-width: 768px) {
+        .settings-section {
+            padding: 0 24px;
+        }
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-left: 4px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #ffffff;
+        letter-spacing: 0.2px;
+    }
+
+    .setting-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 22px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        margin-bottom: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        backdrop-filter: blur(30px) saturate(150%);
+        -webkit-backdrop-filter: blur(30px) saturate(150%);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .setting-card:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateX(4px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .setting-card:active {
+        transform: translateX(2px);
+    }
+
+    .setting-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .setting-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #ffffff;
+        letter-spacing: 0.2px;
+        margin-bottom: 2px;
+    }
+
+    .setting-subtitle {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 0.1px;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 28px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 14px;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+        background: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+    }
+
+    input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+    }
+
+    .info-card {
+        padding: 28px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 28px;
+        margin: 0 16px 20px;
+        animation: fadeIn 1s ease;
+        backdrop-filter: blur(30px) saturate(150%);
+        -webkit-backdrop-filter: blur(30px) saturate(150%);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (min-width: 768px) {
+        .info-card {
+            max-width: 800px;
+            margin: 0 auto 20px;
+        }
+    }
+
+    .info-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #ffffff;
+        letter-spacing: 0.2px;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: start;
+        gap: 16px;
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(30px) saturate(150%);
+        -webkit-backdrop-filter: blur(30px) saturate(150%);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-item svg {
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+
+    .info-item-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #ffffff;
+        letter-spacing: 0.2px;
+    }
+
+    .info-item-text {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.6;
+        letter-spacing: 0.1px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .level-card {
+        position: relative;
+        padding: 20px;
+        margin: 0 16px 32px;
+        background: linear-gradient(135deg, #0a3d25 0%, #0f5233 50%, #0a3d25 100%);
+        border-radius: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        animation: fadeIn 0.8s ease;
+    }
+
+    .level-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.08) 2px, transparent 2px);
+        background-size: 40px 40px, 60px 60px;
+        background-position: 0 0, 20px 20px;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    @media (min-width: 768px) {
+        .level-card {
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+    }
+
+    .level-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .level-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .level-info {
+        flex: 1;
+    }
+
+    .level-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 12px;
+        letter-spacing: -1px;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .level-progress-bar {
+        position: relative;
+        width: 100%;
+        height: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .level-progress-fill {
+        height: 100%;
+        background: repeating-linear-gradient(
+            45deg,
+            #e53935 0px,
+            #e53935 8px,
+            #ffffff 8px,
+            #ffffff 16px
+        );
+        border-radius: 8px;
+        transition: width 0.5s ease;
+        box-shadow: 0 2px 4px rgba(229, 57, 53, 0.3);
+    }
+
+    .level-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .level-progress-numbers {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 700;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .level-snowflake {
+        width: 20px;
+        height: 20px;
+        color: #ffa726;
+    }
+
+    @media (max-width: 480px) {
+        .level-card {
+            padding: 16px;
+            margin: 0 12px 24px;
+        }
+
+        .level-title {
+            font-size: 28px;
+        }
+
+        .level-progress-numbers {
+            font-size: 14px;
+        }
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+    <div id="profileAvatar" class="profile-avatar">
+            <img id="avatarImage" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+            <svg id="avatarPlaceholder" width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+    <h1 id="profileTitle" class="profile-title">Пользователь</h1>
+    <p id="profileUsername" class="profile-username">@username</p>
+</div>
+
+<!-- Статистика -->
+<div class="stats-grid">
+        <div style="padding: 20px; background: transparent; border-radius: 16px; text-align: center;">
+            <div id="statsStars" style="font-size: 28px; font-weight: 700; margin-bottom: 4px; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+            <div style="color: rgba(255, 255, 255, 0.5); font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <img src="data:image/svg+xml;charset=utf-8;base64,PHN2ZyBoZWlnaHQ9IjIwIiB2aWV3Qm94PSIwIDAgMjAgMjAiIHdpZHRoPSIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PGRlZnM+PHBhdGggaWQ9ImEiIGQ9Im02LjAyIDQuOTkgMi4yMS00LjQyYy4yNS0uNTEuODYtLjcyIDEuMzctLjQ2LjIuMS4zNi4yNy40Ni40N2wyLjA4IDQuMjZjLjE3LjM0LjUuNTguODguNjNsNC4zNi41MmMuNTkuMDggMS4wMi42Mi45NSAxLjIyLS4wMy4yNC0uMTQuNDctLjMyLjY1bC0zLjQ1IDMuNDJjLS4xNC4xMy0uMi4zMy0uMTguNTNsLjU3IDQuNjFjLjA5LjY2LS4zOCAxLjI3LTEuMDMgMS4zNS0uMjUuMDMtLjUtLjAyLS43Mi0uMTRsLTMuNjQtMmMtLjI2LS4xNC0uNTgtLjE1LS44NS0uMDFsLTMuNzcgMS45NWMtLjUzLjI3LTEuMTguMDYtMS40NS0uNDgtLjExLS4yLS4xNC0uNDMtLjExLS42NWwuMy0yLjEyYy4xNS0xLjA0Ljc5LTEuOTMgMS43MS0yLjQxbDQuMTktMi4xNWMuMTEtLjA2LjE1LS4yLjEtLjMxLS4wNS0uMDktLjE0LS4xNC0uMjQtLjEybC01LjEyLjc0Yy0uNzguMTEtMS41OC0uMTEtMi4xOS0uNjJsLTEuNzEtMS40Yy0uNDktLjQtLjU2LTEuMTItLjE3LTEuNjIuMTktLjIyLjQ1LS4zNy43NC0uNDFsNC4zOC0uNTdjLjI4LS4wMy41Mi0uMjEuNjUtLjQ2eiIvPjxsaW5lYXJHcmFkaWVudCBpZD0iYiIgeDE9IjI1JSIgeDI9Ijc0LjkyJSIgeTE9Ii44MjUlIiB5Mj0iMTA3Ljg2JSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZkOTUxIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmZiMjIyIi8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9ImMiIHgxPSI1MCUiIHgyPSI1MCUiIHkxPSIwJSIgeTI9Ijk5LjglIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNlNThmMGQiLz48c3RvcCBvZmZzZXQ9Ii45OTk2IiBzdG9wLWNvbG9yPSIjZWI3OTE1Ii8+PC9saW5lYXJHcmFkaWVudD48ZmlsdGVyIGlkPSJkIiBoZWlnaHQ9IjExMC42JSIgd2lkdGg9IjExMC4zJSIgeD0iLTUuMiUiIHk9Ii01LjMlIj48ZmVPZmZzZXQgZHg9IjEiIGR5PSIxIiBpbj0iU291cmNlQWxwaGEiIHJlc3VsdD0ic2hhZG93T2Zmc2V0SW5uZXIxIi8+PGZlQ29tcG9zaXRlIGluPSJzaGFkb3dPZmZzZXRJbm5lcjEiIGluMj0iU291cmNlQWxwaGEiIGsyPSItMSIgazM9IjEiIG9wZXJhdG9yPSJhcml0aG1ldGljIiByZXN1bHQ9InNoYWRvd0lubmVySW5uZXIxIi8+PGZlQ29sb3JNYXRyaXggaW49InNoYWRvd0lubmVySW5uZXIxIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMCAwIDAgMCAxIDAgMCAwIDAgMSAwIDAgMCAwIDEgMCAwIDAgMC42NTcgMCIvPjwvZmlsdGVyPjwvZGVmcz48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEuMzg5IDEuMzg5KSI+PHVzZSBmaWxsPSJ1cmwoI2IpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHhsaW5rOmhyZWY9IiNhIi8+PHVzZSBmaWxsPSIjMDAwIiBmaWx0ZXI9InVybCgjZCkiIHhsaW5rOmhyZWY9IiNhIi8+PHVzZSBzdHJva2U9InVybCgjYykiIHN0cm9rZS13aWR0aD0iLjg5IiB4bGluazpocmVmPSIjYSIvPjwvZz48L3N2Zz4=" alt="star" style="width: 14px; height: 14px; opacity: 0.7;" />
+                <span id="statsStarsLabel">Звезд</span>
+            </div>
+        </div>
+        <div style="padding: 20px; background: transparent; border-radius: 16px; text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; margin-bottom: 4px; background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+            <div style="color: rgba(255, 255, 255, 0.5); font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="rgba(0, 122, 255, 0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 6V12L16 14" stroke="rgba(0, 122, 255, 0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span id="statsGiftsLabel">Бонусы</span>
+            </div>
+        </div>
+        <div style="padding: 20px; background: transparent; border-radius: 16px; text-align: center;">
+            <div id="statsNft" style="font-size: 28px; font-weight: 700; margin-bottom: 4px; background: linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+            <div style="color: rgba(255, 255, 255, 0.5); font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="18" height="18" rx="2" stroke="rgba(255, 107, 107, 0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M3 9H21" stroke="rgba(255, 107, 107, 0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 21V9" stroke="rgba(255, 107, 107, 0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span id="statsNftLabel">NFT</span>
+            </div>
+        </div>
+    </div>
+
+<!-- Плашка уровня и Тайного Санты -->
+<div class="level-card">
+    <div class="level-content">
+        <div class="level-header">
+            <div class="level-info">
+                <div class="level-title">1 LVL</div>
+                <div class="level-progress-bar">
+                    <div class="level-progress-fill" style="width: 1%;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="level-footer">
+            <svg class="level-snowflake" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+            </svg>
+            <div class="level-progress-numbers">
+                <span id="levelCurrent">0</span>
+                <span>/</span>
+                <span id="levelTotal">500</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Настройки -->
+<div class="settings-section">
+    <h2 id="settingsTitle" class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19.4 15C19.2669 15.3016 19.2272 15.6362 19.286 15.9606C19.3448 16.285 19.4995 16.5843 19.73 16.82L19.79 16.88C19.976 17.0657 20.1235 17.2863 20.2241 17.5291C20.3248 17.7719 20.3766 18.0322 20.3766 18.295C20.3766 18.5578 20.3248 18.8181 20.2241 19.0609C20.1235 19.3037 19.976 19.5243 19.79 19.71C19.6043 19.896 19.3837 20.0435 19.1409 20.1441C18.8981 20.2448 18.6378 20.2966 18.375 20.2966C18.1122 20.2966 17.8519 20.2448 17.6091 20.1441C17.3663 20.0435 17.1457 19.896 16.96 19.71L16.9 19.65C16.6643 19.4195 16.365 19.2648 16.0406 19.206C15.7162 19.1472 15.3816 19.1869 15.08 19.32C14.7842 19.4468 14.532 19.6572 14.3543 19.9255C14.1766 20.1938 14.0813 20.5082 14.08 20.83V21C14.08 21.5304 13.8693 22.0391 13.4942 22.4142C13.1191 22.7893 12.6104 23 12.08 23C11.5496 23 11.0409 22.7893 10.6658 22.4142C10.2907 22.0391 10.08 21.5304 10.08 21V20.91C10.0723 20.579 9.96512 20.258 9.77251 19.9887C9.5799 19.7194 9.31074 19.5143 9 19.4C8.69838 19.2669 8.36381 19.2272 8.03941 19.286C7.71502 19.3448 7.41568 19.4995 7.18 19.73L7.12 19.79C6.93425 19.976 6.71368 20.1235 6.47088 20.2241C6.22808 20.3248 5.96783 20.3766 5.705 20.3766C5.44217 20.3766 5.18192 20.3248 4.93912 20.2241C4.69632 20.1235 4.47575 19.976 4.29 19.79C4.10405 19.6043 3.95653 19.3837 3.85588 19.1409C3.75523 18.8981 3.70343 18.6378 3.70343 18.375C3.70343 18.1122 3.75523 17.8519 3.85588 17.6091C3.95653 17.3663 4.10405 17.1457 4.29 16.96L4.35 16.9C4.58054 16.6643 4.73519 16.365 4.794 16.0406C4.85282 15.7162 4.81312 15.3816 4.68 15.08C4.55324 14.7842 4.34276 14.532 4.07447 14.3543C3.80618 14.1766 3.49179 14.0813 3.17 14.08H3C2.46957 14.08 1.96086 13.8693 1.58579 13.4942C1.21071 13.1191 1 12.6104 1 12.08C1 11.5496 1.21071 11.0409 1.58579 10.6658C1.96086 10.2907 2.46957 10.08 3 10.08H3.09C3.42099 10.0723 3.742 9.96512 4.0113 9.77251C4.28059 9.5799 4.48572 9.31074 4.6 9C4.73312 8.69838 4.77282 8.36381 4.714 8.03941C4.65519 7.71502 4.50054 7.41568 4.27 7.18L4.21 7.12C4.02405 6.93425 3.87653 6.71368 3.77588 6.47088C3.67523 6.22808 3.62343 5.96783 3.62343 5.705C3.62343 5.44217 3.67523 5.18192 3.77588 4.93912C3.87653 4.69632 4.02405 4.47575 4.21 4.29C4.39575 4.10405 4.61632 3.95653 4.85912 3.85588C5.10192 3.75523 5.36217 3.70343 5.625 3.70343C5.88783 3.70343 6.14808 3.75523 6.39088 3.85588C6.63368 3.95653 6.85425 4.10405 7.04 4.29L7.1 4.35C7.33568 4.58054 7.63502 4.73519 7.95941 4.794C8.28381 4.85282 8.61838 4.81312 8.92 4.68H9C9.29577 4.55324 9.54802 4.34276 9.72569 4.07447C9.90337 3.80618 9.99872 3.49179 10 3.17V3C10 2.46957 10.2107 1.96086 10.5858 1.58579C10.9609 1.21071 11.4696 1 12 1C12.5304 1 13.0391 1.21071 13.4142 1.58579C13.7893 1.96086 14 2.46957 14 3V3.09C14.0013 3.41179 14.0966 3.72618 14.2743 3.99447C14.452 4.26276 14.7042 4.47324 15 4.6C15.3016 4.73312 15.6362 4.77282 15.9606 4.714C16.285 4.65519 16.5843 4.50054 16.82 4.27L16.88 4.21C17.0657 4.02405 17.2863 3.87653 17.5291 3.77588C17.7719 3.67523 18.0322 3.62343 18.295 3.62343C18.5578 3.62343 18.8181 3.67523 19.0609 3.77588C19.3037 3.87653 19.5243 4.02405 19.71 4.21C19.896 4.39575 20.0435 4.61632 20.1441 4.85912C20.2448 5.10192 20.2966 5.36217 20.2966 5.625C20.2966 5.88783 20.2448 6.14808 20.1441 6.39088C20.0435 6.63368 19.896 6.85425 19.71 7.04L19.65 7.1C19.4195 7.33568 19.2648 7.63502 19.206 7.95941C19.1472 8.28381 19.1869 8.61838 19.32 8.92V9C19.4468 9.29577 19.6572 9.54802 19.9255 9.72569C20.1938 9.90337 20.5082 9.99872 20.83 10H21C21.5304 10 22.0391 10.2107 22.4142 10.5858C22.7893 10.9609 23 11.4696 23 12C23 12.5304 22.7893 13.0391 22.4142 13.4142C22.0391 13.7893 21.5304 14 21 14H20.91C20.5882 14.0013 20.2738 14.0966 20.0055 14.2743C19.7372 14.452 19.5268 14.7042 19.4 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Настройки
+        </h2>
+        
+    <!-- Уведомления -->
+    <div class="setting-card" onclick="document.getElementById('notificationsToggle').click();">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 6.65685 16.3431 8 18 8Z" stroke="rgba(255, 215, 0, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M6 15C7.65685 15 9 13.6569 9 12C9 10.3431 7.65685 9 6 9C4.34315 9 3 10.3431 3 12C3 13.6569 4.34315 15 6 15Z" stroke="rgba(255, 215, 0, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M18 22C19.6569 22 21 20.6569 21 19C21 17.3431 19.6569 16 18 16C16.3431 16 15 17.3431 15 19C15 20.6569 16.3431 22 18 22Z" stroke="rgba(255, 215, 0, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8.59 13.51L15.42 17.49" stroke="rgba(255, 215, 0, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15.41 6.51L8.59 10.49" stroke="rgba(255, 215, 0, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div>
+                    <div id="notificationsTitle" style="font-size: 15px; font-weight: 600; color: #ffffff; letter-spacing: 0.2px;">Уведомления</div>
+                    <div id="notificationsSubtitle" style="font-size: 12px; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.1px;">О новых покупках</div>
+                </div>
+            </div>
+            <label class="toggle-switch" onclick="event.stopPropagation();">
+                <input type="checkbox" id="notificationsToggle" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <!-- Приватность -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 16px; margin-bottom: 12px; transition: all 0.3s ease; cursor: pointer;" onclick="document.getElementById('privacyToggle').click();">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="11" width="18" height="11" rx="2" stroke="rgba(100, 150, 255, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" stroke="rgba(100, 150, 255, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div>
+                    <div id="privacyTitle" style="font-size: 15px; font-weight: 600; color: #ffffff; letter-spacing: 0.2px;">Приватность</div>
+                    <div id="privacySubtitle" style="font-size: 12px; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.1px;">Скрыть коллекцию</div>
+                </div>
+            </div>
+            <label class="toggle-switch" onclick="event.stopPropagation();">
+                <input type="checkbox" id="privacyToggle">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <!-- Язык -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 16px; margin-bottom: 12px; transition: all 0.3s ease; cursor: pointer;" onclick="document.getElementById('languageToggle').click();">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="rgba(100, 200, 150, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12H22" stroke="rgba(100, 200, 150, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z" stroke="rgba(100, 200, 150, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div>
+                    <div id="languageTitle" style="font-size: 15px; font-weight: 600; color: #ffffff; letter-spacing: 0.2px;">Язык</div>
+                    <div style="font-size: 12px; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.1px;" id="currentLanguage">Русский</div>
+                </div>
+            </div>
+            <label class="toggle-switch" onclick="event.stopPropagation();">
+                <input type="checkbox" id="languageToggle">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Дополнительная информация -->
+    <div class="settings-section">
+        <h2 class="section-title" id="infoTitle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Информация
+        </h2>
+        
+        <div class="setting-card" onclick="const tg = window.Telegram?.WebApp; if (tg && tg.showAlert) { tg.showAlert('Версия: 2.4.5'); } else { alert('Версия: 2.4.5'); }">
+            <div class="setting-info">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="5" y="2" width="14" height="20" rx="2" stroke="rgba(150, 150, 255, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 18H12.01" stroke="rgba(150, 150, 255, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div>
+                    <div id="aboutAppTitle" class="setting-title">О приложении</div>
+                    <div id="aboutAppSubtitle" class="setting-subtitle">Версия 2.4.5</div>
+                </div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 5L12.5 10L7.5 15" stroke="rgba(255, 255, 255, 0.4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+
+        <a href="https://t.me/nfton_bot" target="_blank" class="setting-card" style="text-decoration: none; color: inherit;">
+            <div class="setting-info">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="rgba(255, 180, 100, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.91894 12.4272 7.03871C13.1255 7.15849 13.7588 7.52152 14.2151 8.06353C14.6713 8.60553 14.9211 9.29152 14.92 10C14.92 12 11.92 13 11.92 13" stroke="rgba(255, 180, 100, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 17H12.01" stroke="rgba(255, 180, 100, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div>
+                    <div id="helpTitle" class="setting-title">Помощь</div>
+                    <div id="helpSubtitle" class="setting-subtitle">FAQ и поддержка</div>
+                </div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 5L12.5 10L7.5 15" stroke="rgba(255, 255, 255, 0.4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+    </div>
+
+</div>
+
+<style>
+/* Стили для переключателей */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: 0.3s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+}
+</style>
+
+<script>
+const profileTranslations = {
+    ru: {
+        profileTitle: 'Пользователь',
+        username: '@username',
+        statsStarsLabel: 'Звезд',
+        statsGiftsLabel: 'Бонусы',
+        statsNftLabel: 'NFT',
+        settingsTitle: 'Настройки',
+        notificationsTitle: 'Уведомления',
+        notificationsSubtitle: 'О новых покупках',
+        privacyTitle: 'Приватность',
+        privacySubtitle: 'Скрыть коллекцию',
+        languageTitle: 'Язык',
+        infoTitle: 'Информация',
+        aboutAppTitle: 'О приложении',
+        aboutAppSubtitle: 'Версия 2.4.5',
+        helpTitle: 'Помощь',
+        helpSubtitle: 'FAQ и поддержка',
+        connectButtonText: 'Добавить аккаунт'
+    },
+    en: {
+        profileTitle: 'User',
+        username: '@username',
+        statsStarsLabel: 'Stars',
+        statsGiftsLabel: 'Gifts',
+        statsNftLabel: 'NFT',
+        settingsTitle: 'Settings',
+        notificationsTitle: 'Notifications',
+        notificationsSubtitle: 'About new purchases',
+        privacyTitle: 'Privacy',
+        privacySubtitle: 'Hide collection',
+        languageTitle: 'Language',
+        infoTitle: 'Information',
+        aboutAppTitle: 'About app',
+        aboutAppSubtitle: 'Version 1.0.0',
+        helpTitle: 'Help',
+        helpSubtitle: 'FAQ & support',
+        connectButtonText: 'Add account'
+    }
+};
+
+function applyProfileLanguage(lang) {
+    const t = profileTranslations[lang] || profileTranslations.ru;
+
+    const map = {
+        profileTitle: 'profileTitle',
+        username: 'profileUsername',
+        statsStarsLabel: 'statsStarsLabel',
+        statsGiftsLabel: 'statsGiftsLabel',
+        statsNftLabel: 'statsNftLabel',
+        settingsTitle: 'settingsTitle',
+        notificationsTitle: 'notificationsTitle',
+        notificationsSubtitle: 'notificationsSubtitle',
+        privacyTitle: 'privacyTitle',
+        privacySubtitle: 'privacySubtitle',
+        languageTitle: 'languageTitle',
+        infoTitle: 'infoTitle',
+        aboutAppTitle: 'aboutAppTitle',
+        aboutAppSubtitle: 'aboutAppSubtitle',
+        helpTitle: 'helpTitle',
+        helpSubtitle: 'helpSubtitle',
+        connectButtonText: 'connectButtonText'
+    };
+
+    Object.keys(map).forEach(key => {
+        const el = document.getElementById(map[key]);
+        if (el && t[key]) {
+            el.textContent = t[key];
+        }
+    });
+}
+
+// Загрузка настроек из localStorage
+document.addEventListener('DOMContentLoaded', function() {
+    // Уведомления
+    const notificationsToggle = document.getElementById('notificationsToggle');
+    if (notificationsToggle) {
+        const notificationsEnabled = localStorage.getItem('notifications_enabled') !== 'false';
+        notificationsToggle.checked = notificationsEnabled;
+        
+        notificationsToggle.addEventListener('change', function() {
+            localStorage.setItem('notifications_enabled', this.checked);
+            const tg = window.Telegram?.WebApp;
+            if (tg && tg.showAlert) {
+                tg.showAlert(this.checked ? 'Уведомления включены' : 'Уведомления выключены');
+            } else {
+                console.log('Уведомления:', this.checked ? 'включены' : 'выключены');
+            }
+        });
+    }
+    
+    // Приватность
+    const privacyToggle = document.getElementById('privacyToggle');
+    if (privacyToggle) {
+        const privacyEnabled = localStorage.getItem('privacy_mode') === 'private';
+        privacyToggle.checked = privacyEnabled;
+        
+        privacyToggle.addEventListener('change', function() {
+            localStorage.setItem('privacy_mode', this.checked ? 'private' : 'public');
+            const tg = window.Telegram?.WebApp;
+            if (tg && tg.showAlert) {
+                tg.showAlert(this.checked ? 'Режим приватности включен' : 'Режим приватности выключен');
+            } else {
+                console.log('Режим приватности:', this.checked ? 'приватный' : 'публичный');
+            }
+        });
+    }
+    
+    // Язык
+    const languageToggle = document.getElementById('languageToggle');
+    const currentLanguageText = document.getElementById('currentLanguage');
+    if (languageToggle && currentLanguageText) {
+        const language = localStorage.getItem('language') || 'ru';
+        languageToggle.checked = language === 'en';
+        currentLanguageText.textContent = language === 'en' ? 'English' : 'Русский';
+        applyProfileLanguage(language);
+        
+        languageToggle.addEventListener('change', function() {
+            const newLang = this.checked ? 'en' : 'ru';
+            localStorage.setItem('language', newLang);
+            currentLanguageText.textContent = newLang === 'en' ? 'English' : 'Русский';
+            const tg = window.Telegram?.WebApp;
+            if (tg && tg.showAlert) {
+                tg.showAlert(`Язык изменен на: ${newLang === 'en' ? 'English' : 'Русский'}`);
+            } else {
+                console.log('Язык изменен на:', newLang);
+            }
+            applyProfileLanguage(newLang);
+            // Перезагружаем страницу для применения изменений
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        });
+    }
+    
+    // Загрузка реальных данных профиля
+    loadProfileData();
+});
+
+// Функция загрузки данных профиля
+async function loadProfileData() {
+    try {
+        console.log('[Profile] Начало загрузки данных профиля');
+        const tg = window.Telegram?.WebApp;
+        console.log('[Profile] Telegram WebApp:', tg);
+        if (!tg) {
+            console.error('[Profile] Telegram WebApp не найден!');
+            return;
+        }
+        
+        // Получаем данные пользователя из initDataUnsafe
+        const user = tg.initDataUnsafe?.user;
+        console.log('[Profile] User данные:', user);
+        if (user && user.id) {
+            console.log('[Profile] User ID:', user.id, 'Username:', user.username);
+            // Обновляем имя пользователя
+            const profileTitle = document.getElementById('profileTitle');
+            console.log('[Profile] profileTitle element:', profileTitle);
+            if (profileTitle) {
+                const firstName = user.first_name || '';
+                const lastName = user.last_name || '';
+                const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Пользователь';
+                console.log('[Profile] Устанавливаю имя:', fullName);
+                profileTitle.textContent = fullName;
+            }
+            
+            // Обновляем username
+            const profileUsername = document.getElementById('profileUsername');
+            console.log('[Profile] profileUsername element:', profileUsername);
+            if (profileUsername) {
+                const username = user.username;
+                console.log('[Profile] Устанавливаю username:', username);
+                if (username) {
+                    profileUsername.textContent = `@${username}`;
+                } else {
+                    profileUsername.textContent = '';
+                }
+            }
+            
+            // Загружаем аватарку
+            const avatarImage = document.getElementById('avatarImage');
+            const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+            
+            if (user.photo_url) {
+                // Используем photo_url из Telegram WebApp
+                if (avatarImage) {
+                    avatarImage.src = user.photo_url;
+                    avatarImage.style.display = 'block';
+                    avatarImage.onerror = () => {
+                        // Если загрузка не удалась, показываем placeholder
+                        avatarImage.style.display = 'none';
+                        if (avatarPlaceholder) avatarPlaceholder.style.display = 'block';
+                    };
+                }
+                if (avatarPlaceholder) avatarPlaceholder.style.display = 'none';
+            } else {
+                // Пытаемся получить аватарку через API
+                try {
+                    const avatarResponse = await fetch(`/api/user/avatar/${user.id}`);
+                    if (avatarResponse.ok) {
+                        const avatarData = await avatarResponse.json();
+                        if (avatarData.success && avatarData.avatar_url) {
+                            if (avatarImage) {
+                                avatarImage.src = avatarData.avatar_url;
+                                avatarImage.style.display = 'block';
+                                avatarImage.onerror = () => {
+                                    avatarImage.style.display = 'none';
+                                    if (avatarPlaceholder) avatarPlaceholder.style.display = 'block';
+                                };
+                            }
+                            if (avatarPlaceholder) avatarPlaceholder.style.display = 'none';
+                        } else {
+                            // Нет аватарки, показываем placeholder
+                            if (avatarImage) avatarImage.style.display = 'none';
+                            if (avatarPlaceholder) avatarPlaceholder.style.display = 'block';
+                        }
+                    } else {
+                        if (avatarImage) avatarImage.style.display = 'none';
+                        if (avatarPlaceholder) avatarPlaceholder.style.display = 'block';
+                    }
+                } catch (avatarError) {
+                    console.warn('Не удалось загрузить аватарку:', avatarError);
+                    if (avatarImage) avatarImage.style.display = 'none';
+                    if (avatarPlaceholder) avatarPlaceholder.style.display = 'block';
+                }
+            }
+            
+            // Загружаем баланс звезд
+            console.log('[Profile] Загружаю баланс для user.id:', user.id);
+            try {
+                const balanceResponse = await fetch(`/api/user/by-telegram-id/${user.id}`);
+                console.log('[Profile] Balance response status:', balanceResponse.status);
+                if (balanceResponse.ok) {
+                    const balanceData = await balanceResponse.json();
+                    console.log('[Profile] Balance data:', balanceData);
+                    if (balanceData.success && balanceData.data && balanceData.data.balances) {
+                        const starsBalance = balanceData.data.balances.STARS || 0;
+                        console.log('[Profile] Stars balance from API:', starsBalance);
+                        const starsElement = document.getElementById('statsStars');
+                        console.log('[Profile] statsStars element found:', !!starsElement);
+                        if (starsElement) {
+                            const formattedBalance = starsBalance.toLocaleString('ru-RU').replace(/,/g, ' ');
+                            // Используем textContent для установки текста (градиент применяется через CSS)
+                            starsElement.textContent = formattedBalance;
+                            // Также обновляем innerHTML на случай если нужно
+                            starsElement.innerHTML = formattedBalance;
+                            console.log('[Profile] Установил баланс:', formattedBalance, 'в элемент:', starsElement);
+                            // Дополнительная проверка что значение установилось
+                            setTimeout(() => {
+                                console.log('[Profile] Проверка после установки. textContent:', starsElement.textContent, 'innerHTML:', starsElement.innerHTML);
+                            }, 100);
+                        } else {
+                            console.error('[Profile] Элемент statsStars не найден! Проверяю все элементы со stats...');
+                            const allStats = document.querySelectorAll('[id*="stats"]');
+                            console.log('[Profile] Найдено элементов со stats:', allStats.length, allStats);
+                        }
+                    } else {
+                        console.warn('[Profile] Неверная структура данных баланса:', balanceData);
+                    }
+                } else {
+                    const errorText = await balanceResponse.text();
+                    console.error('[Profile] Ошибка получения баланса. Status:', balanceResponse.status, 'Response:', errorText);
+                }
+            } catch (balanceError) {
+                console.error('[Profile] Исключение при загрузке баланса:', balanceError);
+            }
+        } else {
+            console.warn('[Profile] User данные отсутствуют или неполные');
+        }
+        
+        const initData = tg.initData;
+        console.log('[Profile] initData:', initData ? 'present' : 'missing');
+        if (!initData) {
+            console.warn('[Profile] initData отсутствует, не могу загрузить NFT');
+            return;
+        }
+        
+        // Получаем количество NFT из коллекций
+        console.log('[Profile] Загружаю NFT коллекции...');
+        const giftsResponse = await fetch(`/api/gifts?init_data=${encodeURIComponent(initData)}`);
+        console.log('[Profile] Gifts response status:', giftsResponse.status);
+        if (giftsResponse.ok) {
+            const giftsData = await giftsResponse.json();
+            console.log('[Profile] Gifts data:', giftsData);
+            const nftCount = giftsData.gifts ? giftsData.gifts.length : 0;
+            console.log('[Profile] NFT count:', nftCount);
+            
+            // Обновляем счетчик NFT
+            const nftCountElement = document.getElementById('statsNft');
+            console.log('[Profile] statsNft element:', nftCountElement);
+            if (nftCountElement) {
+                nftCountElement.textContent = nftCount.toLocaleString('ru-RU').replace(/,/g, ' ');
+                console.log('[Profile] Установил NFT count:', nftCountElement.textContent);
+            }
+        }
+    } catch (error) {
+        console.error('[Profile] Ошибка загрузки данных профиля:', error);
+    }
+}
+
+</script>
+
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        
+
+{% endblock %}

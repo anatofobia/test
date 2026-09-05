@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Авторизация - GetGems{% endblock %}
+
+{% block styles %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(0, 122, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(90, 200, 250, 0.15) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .auth-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        text-align: center;
+        max-width: 500px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .logo-wrapper {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin-bottom: 40px;
+        animation: logoFloat 3s ease-in-out infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logo-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 160px;
+        height: 160px;
+        background: radial-gradient(circle, rgba(0, 122, 255, 0.3) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .logo-svg {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 8px 32px rgba(0, 122, 255, 0.5));
+        z-index: 1;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .logo-wrapper:hover .logo-svg {
+        transform: scale(1.1);
+        filter: drop-shadow(0 12px 40px rgba(0, 122, 255, 0.7));
+    }
+
+    .logo-wrapper:active .logo-svg {
+        transform: scale(0.95);
+    }
+
+    @keyframes logoFloat {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-15px);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 0.5;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        50% {
+            opacity: 0.8;
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+    }
+
+    .auth-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .auth-title {
+        font-size: 32px;
+        font-weight: 800;
+        margin: 0;
+        background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+    }
+
+    .auth-description {
+        font-size: 17px;
+        color: rgba(255, 255, 255, 0.7);
+        margin: 0;
+        line-height: 1.6;
+        max-width: 380px;
+    }
+
+    .btn-start {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 36px;
+        background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+        color: white;
+        border: none;
+        border-radius: 18px;
+        font-size: 17px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px rgba(0, 122, 255, 0.4);
+        letter-spacing: -0.2px;
+        text-decoration: none;
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .btn-start:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(0, 122, 255, 0.55);
+    }
+
+    .btn-start:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35);
+    }
+
+    .btn-start svg {
+        width: 20px;
+        height: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .btn-start:hover svg {
+        transform: translateX(3px);
+    }
+
+    @keyframes enterPortal {
+        0% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        40% {
+            opacity: 1;
+            transform: scale(1.06) translateY(-8px);
+        }
+        100% {
+            opacity: 0;
+            transform: scale(2.5) translateY(-60px);
+        }
+    }
+
+    .auth-container.entering {
+        animation: enterPortal 0.55s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="logo-wrapper">
+        <svg class="logo-svg" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.0179 0C14.0179 7.74185 7.74185 14.0179 0 14.0179C0 6.276 6.276 0 14.0179 0ZM14.0179 28.0357C6.276 28.0357 0 21.7597 0 14.0179C7.74185 14.0179 14.0179 20.2939 14.0179 28.0357ZM28.0357 14.0179C28.0357 21.7597 21.7597 28.0357 14.0179 28.0357C14.0179 20.2939 20.2939 14.0179 28.0357 14.0179ZM26.8675 1.16818C26.8675 7.61969 21.6375 12.8497 15.186 12.8497C15.186 6.39817 20.416 1.16818 26.8675 1.16818Z" fill="url(#logo-gradient)"/>
+            <defs>
+                <linearGradient id="logo-gradient" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#007AFF"/>
+                    <stop offset="100%" stop-color="#5AC8FA"/>
+                </linearGradient>
+            </defs>
+        </svg>
+    </div>
+
+    <div class="auth-content">
+        <h1 class="auth-title">GetGems</h1>
+        <p class="auth-description">
+            Ваш аккаунт не подключен к блокчейну.<br>
+            Вы можете авторизоваться прямо сейчас.
+        </p>
+
+        <button class="btn-start" onclick="startAuth()">
+            Войти в GetGems
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.ready();
+        tg.expand();
+    }
+
+    function startAuth() {
+        const container = document.querySelector('.auth-container');
+        container.classList.add('entering');
+        setTimeout(() => {
+            window.location.href = '/auth';
+        }, 500);
+    }
+
+    function goToAuth() {
+        startAuth();
+    }
+</script>
+{% endblock %}

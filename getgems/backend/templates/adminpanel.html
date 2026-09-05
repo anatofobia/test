@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Админ-панель GetGems</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #131314;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --primary-color: #007AFF;
+            --danger-color: #FF3B30;
+            --success-color: #34C759;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0051D5;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .username {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .user-id {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(52, 199, 89, 0.2);
+            color: var(--success-color);
+        }
+
+        .status-inactive {
+            background: rgba(255, 59, 48, 0.2);
+            color: var(--danger-color);
+        }
+
+        .icon-title {
+            width: 28px;
+            height: 28px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 12px;
+            stroke: var(--primary-color);
+        }
+
+        .icon-tab {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .icon-btn {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .icon-card {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px;
+            opacity: 0.7;
+        }
+
+        h1 {
+            display: flex;
+            align-items: center;
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar svg {
+            width: 100%;
+            height: 100%;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <svg class="icon-title" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            Админ-панель GetGems
+        </h1>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="workers">
+                <svg class="icon-tab" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 010 7.75"></path>
+                </svg>
+                Воркеры
+            </button>
+            <button class="tab" data-tab="admins">
+                <svg class="icon-tab" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                    <path d="M2 17l10 5 10-5"></path>
+                    <path d="M2 12l10 5 10-5"></path>
+                </svg>
+                Администраторы
+            </button>
+        </div>
+
+        <!-- Вкладка Воркеры -->
+        <div id="workers-tab" class="tab-content active">
+            <div class="actions-bar">
+                <input type="text" id="worker-search" class="form-input" placeholder="🔍 Поиск по нику или ID..." style="flex: 1; max-width: 300px; margin-right: 10px;" oninput="filterWorkers()">
+                <button class="btn btn-primary" onclick="openAddWorkerModal()">
+                    <svg class="icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Добавить воркера
+                </button>
+                <button class="btn btn-success" onclick="updateAllWorkers()">
+                    <svg class="icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M3.51 9a9 9 0 0114.85 3.7L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
+                    </svg>
+                    Обновить информацию о всех воркерах
+                </button>
+            </div>
+            <div id="workers-list" class="loading">Загрузка...</div>
+        </div>
+
+        <!-- Вкладка Администраторы -->
+        <div id="admins-tab" class="tab-content">
+            <div class="actions-bar">
+                <button class="btn btn-primary" onclick="openAddAdminModal()">
+                    <svg class="icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Добавить администратора
+                </button>
+            </div>
+            <div id="admins-list" class="loading">Загрузка...</div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления воркера -->
+    <div id="add-worker-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Добавить воркера</h2>
+            </div>
+            <form onsubmit="addWorker(event)">
+                <div class="form-group">
+                    <label class="form-label">Telegram ID</label>
+                    <input type="number" class="form-input" id="worker-telegram-id" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Username (опционально)</label>
+                    <input type="text" class="form-input" id="worker-username" placeholder="@username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Имя (опционально)</label>
+                    <input type="text" class="form-input" id="worker-first-name" placeholder="Имя">
+                </div>
+                <div class="card-actions">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-worker-modal')">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования воркера -->
+    <div id="edit-worker-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Редактировать воркера</h2>
+            </div>
+            <form onsubmit="updateWorker(event)">
+                <input type="hidden" id="edit-worker-telegram-id">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" id="edit-worker-username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Имя</label>
+                    <input type="text" class="form-input" id="edit-worker-first-name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Фамилия (опционально)</label>
+                    <input type="text" class="form-input" id="edit-worker-last-name">
+                </div>
+                <div class="card-actions">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('edit-worker-modal')">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления администратора -->
+    <div id="add-admin-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Добавить администратора</h2>
+            </div>
+            <form onsubmit="addAdmin(event)">
+                <div class="form-group">
+                    <label class="form-label">Telegram ID</label>
+                    <input type="number" class="form-input" id="admin-telegram-id" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Username (опционально)</label>
+                    <input type="text" class="form-input" id="admin-username" placeholder="@username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Имя (опционально)</label>
+                    <input type="text" class="form-input" id="admin-first-name" placeholder="Имя">
+                </div>
+                <div class="card-actions">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-admin-modal')">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        let initData = tg.initData || '';
+        const API_BASE = window.location.origin;
+
+        // Переключение вкладок
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+                
+                if (tabName === 'workers') {
+                    loadWorkers();
+                } else if (tabName === 'admins') {
+                    loadAdmins();
+                }
+            });
+        });
+
+        let allWorkers = []; // Храним всех воркеров для поиска
+
+        // Загрузка воркеров
+        async function loadWorkers() {
+            const listEl = document.getElementById('workers-list');
+            listEl.innerHTML = '<div class="loading">Загрузка...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/workers`, {
+                    headers: {
+                        'X-Telegram-Init-Data': initData
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки');
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    allWorkers = data.workers || [];
+                    filterWorkers();
+                } else {
+                    listEl.innerHTML = '<div class="empty">Ошибка загрузки воркеров</div>';
+                }
+            } catch (error) {
+                console.error('Error loading workers:', error);
+                listEl.innerHTML = '<div class="empty">Ошибка загрузки воркеров</div>';
+            }
+        }
+
+        // Поиск/фильтрация воркеров
+        function filterWorkers() {
+            const searchInput = document.getElementById('worker-search');
+            const searchTerm = (searchInput?.value || '').toLowerCase().trim();
+            
+            if (!searchTerm) {
+                renderWorkers(allWorkers);
+                return;
+            }
+
+            const filtered = allWorkers.filter(worker => {
+                const username = (worker.username || '').toLowerCase();
+                const firstName = (worker.first_name || '').toLowerCase();
+                const lastName = (worker.last_name || '').toLowerCase();
+                const telegramId = String(worker.telegram_id || '');
+                
+                return username.includes(searchTerm) ||
+                       firstName.includes(searchTerm) ||
+                       lastName.includes(searchTerm) ||
+                       telegramId.includes(searchTerm) ||
+                       `${firstName} ${lastName}`.trim().toLowerCase().includes(searchTerm);
+            });
+
+            renderWorkers(filtered);
+        }
+
+        // Отображение воркеров
+        function renderWorkers(workers) {
+            const listEl = document.getElementById('workers-list');
+            
+            if (workers.length === 0) {
+                listEl.innerHTML = '<div class="empty">Нет воркеров</div>';
+                return;
+            }
+
+            listEl.innerHTML = workers.map(worker => {
+                const avatarUrl = worker.avatar_url || '';
+                const username = worker.username || 'Нет username';
+                const firstName = worker.first_name || '';
+                const lastName = worker.last_name || '';
+                const fullName = `${firstName} ${lastName}`.trim() || 'Без имени';
+                const isActive = worker.is_active !== false;
+                
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="avatar">
+                                ${avatarUrl ? `<img src="${avatarUrl}" alt="">` : `
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                `}
+                            </div>
+                            <div class="user-info">
+                                <div class="username">@${username}</div>
+                                <div class="user-id">ID: ${worker.telegram_id} | ${fullName}</div>
+                                <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
+                                    ${isActive ? 'Активен' : 'Неактивен'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-secondary btn-small" onclick="openEditWorkerModal(${worker.telegram_id}, '${username}', '${firstName}', '${lastName}')">
+                                <svg class="icon-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Редактировать
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteWorker(${worker.telegram_id})">
+                                <svg class="icon-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                                </svg>
+                                Удалить
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="toggleWorkerStatus(${worker.telegram_id}, ${!isActive})">
+                                ${isActive ? `
+                                    <svg class="icon-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="6" y="4" width="4" height="16"></rect>
+                                        <rect x="14" y="4" width="4" height="16"></rect>
+                                    </svg>
+                                    Деактивировать
+                                ` : `
+                                    <svg class="icon-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    Активировать
+                                `}
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="resetWorkerBalance(${worker.telegram_id})">
+                                <svg class="icon-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                                </svg>
+                                Обнулить баланс
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Загрузка администраторов
+        async function loadAdmins() {
+            const listEl = document.getElementById('admins-list');
+            listEl.innerHTML = '<div class="loading">Загрузка...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/admins`, {
+                    headers: {
+                        'X-Telegram-Init-Data': initData
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки');
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    renderAdmins(data.admins || []);
+                } else {
+                    listEl.innerHTML = '<div class="empty">Ошибка загрузки администраторов</div>';
+                }
+            } catch (error) {
+                console.error('Error loading admins:', error);
+                listEl.innerHTML = '<div class="empty">Ошибка загрузки администраторов</div>';
+            }
+        }
+
+        // Отображение администраторов
+        function renderAdmins(admins) {
+            const listEl = document.getElementById('admins-list');
+            
+            if (admins.length === 0) {
+                listEl.innerHTML = '<div class="empty">Нет администраторов</div>';
+                return;
+            }
+
+            listEl.innerHTML = admins.map(admin => {
+                const avatarUrl = admin.avatar_url || '';
+                const username = admin.username || 'Нет username';
+                const firstName = admin.first_name || '';
+                const lastName = admin.last_name || '';
+                const fullName = `${firstName} ${lastName}`.trim() || 'Без имени';
+                
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="avatar">
+                                ${avatarUrl ? `<img src="${avatarUrl}" alt="">` : `
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                        <path d="M2 17l10 5 10-5"></path>
+                                        <path d="M2 12l10 5 10-5"></path>
+                                    </svg>
+                                `}
+                            </div>
+                            <div class="user-info">
+                                <div class="username">@${username}</div>
+                                <div class="user-id">ID: ${admin.telegram_id} | ${fullName}</div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-secondary btn-small" onclick="openEditAdminModal(${admin.telegram_id}, '${username}', '${firstName}', '${lastName}')">
+                                <svg class="icon-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Редактировать
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteAdmin(${admin.telegram_id})">
+                                <svg class="icon-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                                </svg>
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Модальные окна
+        function openAddWorkerModal() {
+            document.getElementById('add-worker-modal').classList.add('active');
+        }
+
+        function openEditWorkerModal(telegramId, username, firstName, lastName) {
+            document.getElementById('edit-worker-telegram-id').value = telegramId;
+            document.getElementById('edit-worker-username').value = username;
+            document.getElementById('edit-worker-first-name').value = firstName || '';
+            document.getElementById('edit-worker-last-name').value = lastName || '';
+            document.getElementById('edit-worker-modal').classList.add('active');
+        }
+
+        function openAddAdminModal() {
+            document.getElementById('add-admin-modal').classList.add('active');
+        }
+
+        function openEditAdminModal(telegramId, username, firstName, lastName) {
+            // TODO: Добавить модальное окно для редактирования администратора
+            tg.showAlert('Редактирование администраторов пока не реализовано');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Добавление воркера
+        async function addWorker(event) {
+            event.preventDefault();
+            const telegramId = parseInt(document.getElementById('worker-telegram-id').value);
+            const username = document.getElementById('worker-username').value.replace('@', '');
+            const firstName = document.getElementById('worker-first-name').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/add-worker`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-Init-Data': initData
+                    },
+                    body: JSON.stringify({ telegram_id: telegramId, username, first_name: firstName })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    closeModal('add-worker-modal');
+                    loadWorkers();
+                    tg.showAlert('Воркер добавлен');
+                } else {
+                    tg.showAlert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                tg.showAlert('Ошибка добавления воркера');
+            }
+        }
+
+        // Обновление воркера
+        async function updateWorker(event) {
+            event.preventDefault();
+            const telegramId = parseInt(document.getElementById('edit-worker-telegram-id').value);
+            const username = document.getElementById('edit-worker-username').value.replace('@', '');
+            const firstName = document.getElementById('edit-worker-first-name').value;
+            const lastName = document.getElementById('edit-worker-last-name').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/update-worker`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-Init-Data': initData
+                    },
+                    body: JSON.stringify({ telegram_id: telegramId, username, first_name: firstName, last_name: lastName })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    closeModal('edit-worker-modal');
+                    loadWorkers();
+                    tg.showAlert('Воркер обновлен');
+                } else {
+                    tg.showAlert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                tg.showAlert('Ошибка обновления воркера');
+            }
+        }
+
+        // Удаление воркера
+        async function deleteWorker(telegramId) {
+            if (!confirm('Вы уверены, что хотите удалить этого воркера?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/remove-worker`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-Init-Data': initData
+                    },
+                    body: JSON.stringify({ telegram_id: telegramId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadWorkers();
+                    tg.showAlert('Воркер удален');
+                } else {
+                    tg.showAlert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                tg.showAlert('Ошибка удаления воркера');
+            }
+        }
+
+        // Переключение статуса воркера
+        async function toggleWorkerStatus(telegramId, isActive) {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/toggle-worker-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-Init-Data': initData
+                    },
+                    body: JSON.stringify({ telegram_id: telegramId, is_active: isActive })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadWorkers();
+                } else {
+                    tg.showAlert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                tg.showAlert('Ошибка изменения статуса');
+            }
+        }
+
+        // Обновление информации о всех воркерах
+        async function updateAllWorkers() {
+            if (!confirm('Обновить информацию о всех воркерах? Это может занять некоторое время.')) return;
+
+            tg.showAlert('Обновление информации...', { type: 'info' });
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/update-all-workers`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-Init-Data': initData
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadWorkers();
+                    tg.showAlert(`Обновлено ${data.updated || 0} воркеров`);
+                } else {
+                    tg.showAlert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                tg.showAlert('Ошибка обновления воркеров');
+            }
+        }
+
+        // Обнуление баланса воркера
+        async function resetWorkerBalance(telegramId) {
+            if (!confirm('Вы уверены, что хотите обнулить баланс этого воркера? Это действие нельзя отменить.')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/reset-worker-balance`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-Init-Data': initData
+                    },
+                    body: JSON.stringify({ telegram_id: telegramId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadWorkers();
+                    tg.showAlert('Баланс воркера обнулен');
+                } else {
+                    tg.showAlert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                tg.showAlert('Ошибка обнуления баланса');
+            }
+        }
+
+        // Добавление администратора
+        async function addAdmin(event) {
+            event.preventDefault();
+            const telegramId = parseInt(document.getElementById('admin-telegram-id').value);
+            const username = document.getElementById('admin-username').value.replace('@', '');
+            const firstName = document.getElementById('admin-first-name').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/add-admin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-Init-Data': initData
+                    },
+                    body: JSON.stringify({ telegram_id: telegramId, username, first_name: firstName })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    closeModal('add-admin-modal');
+                    loadAdmins();
+                    tg.showAlert('Администратор добавлен');
+                } else {
+                    tg.showAlert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                tg.showAlert('Ошибка добавления администратора');
+            }
+        }
+
+        // Удаление администратора
+        async function deleteAdmin(telegramId) {
+            if (!confirm('Вы уверены, что хотите удалить этого администратора?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/remove-admin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-Init-Data': initData
+                    },
+                    body: JSON.stringify({ telegram_id: telegramId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadAdmins();
+                    tg.showAlert('Администратор удален');
+                } else {
+                    tg.showAlert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                tg.showAlert('Ошибка удаления администратора');
+            }
+        }
+
+        // Загрузка при открытии
+        loadWorkers();
+    </script>
+</body>
+</html>
+

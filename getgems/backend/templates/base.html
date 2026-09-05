@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>{% block title %}Getgems{% endblock %}</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        // Ранняя инициализация Telegram Web App для полноэкранного режима
+        // Важно вызвать expand() как можно раньше для полноэкранного режима
+        (function() {
+            function initTelegramExpand() {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    const tg = window.Telegram.WebApp;
+                    tg.ready();
+                    tg.expand();
+                    tg.disableVerticalSwipes();
+                    return true;
+                }
+                return false;
+            }
+            
+            // Пытаемся сразу
+            if (!initTelegramExpand()) {
+                // Повторные попытки если API еще не загружен
+                var attempts = 0;
+                var interval = setInterval(function() {
+                    attempts++;
+                    if (initTelegramExpand() || attempts >= 20) {
+                        clearInterval(interval);
+                    }
+                }, 50);
+            }
+        })();
+    </script>
+    <style>
+        :root {
+            --safe-area-inset-top: env(safe-area-inset-top);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+            --primary-color: #007AFF;
+            --primary-hover: #0051D5;
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #131314;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            padding-top: calc(56px + var(--safe-area-inset-top));
+            padding-bottom: calc(76px + var(--safe-area-inset-bottom));
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Контейнер для частиц */
+        .snowflakes-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .snowflake {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            user-select: none;
+            will-change: transform;
+            transition: transform 0.1s linear, opacity 0.1s linear;
+        }
+
+        /* Верхний бар - жидкое стекло */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: calc(56px + var(--safe-area-inset-top));
+            padding-top: var(--safe-area-inset-top);
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.03),
+                        0 4px 12px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 16px;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo-container:hover .logo-icon {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 8px rgba(0, 122, 255, 0.5));
+        }
+
+        .logo-container:active .logo-icon {
+            transform: scale(0.95);
+        }
+
+        .logo-text {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Контейнер контента */
+        .container {
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            min-height: calc(100vh - 132px - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+            padding: 0;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Нижняя навигация - жидкое стекло */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(66px + var(--safe-area-inset-bottom));
+            padding-bottom: var(--safe-area-inset-bottom);
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding-left: max(env(safe-area-inset-left), 12px);
+            padding-right: max(env(safe-area-inset-right), 12px);
+            z-index: 1001;
+            box-shadow: 0 -1px 0 0 rgba(255, 255, 255, 0.03),
+                        0 -8px 24px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px 16px;
+            min-width: 70px;
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 16px;
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            background: radial-gradient(circle at center, rgba(0, 122, 255, 0.15) 0%, transparent 70%);
+            border-radius: 20px;
+            filter: blur(8px);
+            z-index: -1;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .nav-icon {
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-item.active .nav-icon {
+            transform: translateY(-2px);
+            filter: drop-shadow(0 4px 12px rgba(0, 122, 255, 0.6));
+        }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .nav-label {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active .nav-label {
+            text-shadow: 0 0 12px rgba(0, 122, 255, 0.5);
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        /* Стили для карточек - более закругленные */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 20px;
+            backdrop-filter: blur(30px) saturate(150%);
+            -webkit-backdrop-filter: blur(30px) saturate(150%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Кнопки - более закругленные */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 18px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.25),
+                        0 0 0 1px rgba(0, 122, 255, 0.1) inset;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(0, 122, 255, 0.35),
+                        0 0 0 1px rgba(0, 122, 255, 0.2) inset;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0) scale(1);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        /* Inputs - более закругленные */
+        input, textarea {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: rgba(0, 122, 255, 0.5);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1),
+                        0 4px 16px rgba(0, 122, 255, 0.2);
+        }
+
+        /* Скроллбар */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Утилиты */
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease forwards;
+        }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- Верхний бар -->
+    <div class="top-bar">
+        <div class="logo-container">
+            <svg class="logo-icon" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.0179 0C14.0179 7.74185 7.74185 14.0179 0 14.0179C0 6.276 6.276 0 14.0179 0ZM14.0179 28.0357C6.276 28.0357 0 21.7597 0 14.0179C7.74185 14.0179 14.0179 20.2939 14.0179 28.0357ZM28.0357 14.0179C28.0357 21.7597 21.7597 28.0357 14.0179 28.0357C14.0179 20.2939 20.2939 14.0179 28.0357 14.0179ZM26.8675 1.16818C26.8675 7.61969 21.6375 12.8497 15.186 12.8497C15.186 6.39817 20.416 1.16818 26.8675 1.16818Z" fill="url(#logo-gradient)"/>
+                <defs>
+                    <linearGradient id="logo-gradient" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#007AFF"/>
+                        <stop offset="100%" stop-color="#5AC8FA"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <span class="logo-text">Getgems</span>
+        </div>
+    </div>
+
+    <!-- Контейнер для снежинок -->
+    <div class="snowflakes-container" id="snowflakesContainer"></div>
+
+    <!-- Контент -->
+    <div class="container" style="position: relative; z-index: 2;">
+        <div class="main-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Нижняя навигация -->
+    <nav class="bottom-nav">
+        <a href="/market" class="nav-item" id="nav-market">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <span class="nav-label">Маркет</span>
+        </a>
+        <a href="/stars" class="nav-item" id="nav-stars">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <span class="nav-label">Звезды</span>
+        </a>
+        <a href="/collections" class="nav-item" id="nav-collections">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <span class="nav-label">Коллекции</span>
+        </a>
+        <a href="/profile" class="nav-item" id="nav-profile">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <span class="nav-label">Профиль</span>
+        </a>
+    </nav>
+
+    <script>
+        // Дополнительная инициализация Telegram Web App (настройки цветов и других параметров)
+        // Эта часть выполняется после загрузки DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                
+                // Убеждаемся что expand() вызван (безопасно вызвать повторно)
+                tg.expand();
+                
+                // Настраиваем цвета темы
+                tg.setHeaderColor('#0A0A0A');
+                tg.setBackgroundColor('#0A0A0A');
+                
+                // Включаем подтверждение закрытия
+                tg.enableClosingConfirmation();
+            }
+        });
+
+        // Активная навигация
+        function setActiveNav() {
+            const path = window.location.pathname;
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                const href = item.getAttribute('href');
+                if (path === href || (path.startsWith(href) && href !== '/')) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Инициализация при загрузке
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setActiveNav);
+        } else {
+            setActiveNav();
+        }
+
+        // Обновление при навигации
+        window.addEventListener('popstate', setActiveNav);
+
+        // Плавная прокрутка вверх при клике на логотип
+        document.querySelector('.logo-container')?.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Haptic feedback для навигации (если доступно)
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.Telegram?.WebApp?.HapticFeedback) {
+                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                }
+            });
+        });
+
+        // Плавающие точки-частицы
+        (function() {
+            const PARTICLES_COUNT = 40;
+            const container = document.getElementById('snowflakesContainer');
+            if (!container) return;
+
+            const particles = [];
+            for (let i = 0; i < PARTICLES_COUNT; i++) {
+                const size = 1.5 + Math.random() * 2.5; // 1.5–4px
+                const config = {
+                    x: Math.random() * 100,
+                    delay: Math.random() * 8,
+                    duration: 15 + Math.random() * 20,
+                    size: size,
+                    drift: (Math.random() - 0.5) * 3, // горизонтальное смещение
+                    opacity: 0.2 + Math.random() * 0.4
+                };
+                const el = document.createElement('div');
+                el.className = 'snowflake';
+                el.style.left = config.x + '%';
+                el.style.width = config.size + 'px';
+                el.style.height = config.size + 'px';
+                container.appendChild(el);
+                particles.push({ element: el, config, startTime: Date.now() - config.delay * 1000 * Math.random() });
+            }
+
+            function animate() {
+                const now = Date.now();
+                particles.forEach(({ element, config, startTime }) => {
+                    const elapsed = (now - startTime) / 1000;
+                    const totalCycle = config.delay + config.duration;
+                    const cycle = elapsed % totalCycle;
+
+                    let progress, opacity;
+                    if (cycle < config.delay) {
+                        progress = 0; opacity = 0;
+                    } else {
+                        progress = (cycle - config.delay) / config.duration;
+                        opacity = progress < 0.08 ? progress / 0.08 * config.opacity
+                                : progress > 0.92 ? (1 - progress) / 0.08 * config.opacity
+                                : config.opacity;
+                    }
+
+                    const y = -5 + progress * 110;
+                    const x = Math.sin(progress * Math.PI * 2) * config.drift;
+                    element.style.opacity = opacity.toFixed(3);
+                    element.style.transform = `translateY(${y}vh) translateX(${x}vw)`;
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        })();
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

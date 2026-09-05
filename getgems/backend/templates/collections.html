@@ -1,0 +1,1748 @@
+{% extends "base.html" %}
+
+{% block title %}Коллекции - Getgems{% endblock %}
+
+{% block styles %}
+<style>
+    .collections-header {
+        padding: 24px 20px;
+        text-align: center;
+        animation: fadeIn 0.6s ease;
+    }
+
+    .collections-title {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+    }
+
+    .collections-subtitle {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 500;
+    }
+
+    .gifts-grid {
+        padding: 0 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 1400px;
+        margin: 0 auto;
+        animation: slideUp 0.6s ease;
+    }
+
+    @media (min-width: 768px) {
+        .gifts-grid {
+            gap: 16px;
+            padding: 0 24px 20px;
+        }
+    }
+
+    .gift-item {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 16px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        cursor: pointer;
+        animation: fadeIn 0.5s ease backwards;
+        z-index: 10;
+        width: 100%;
+    }
+
+    .gift-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+    
+    .gift-item:hover {
+        transform: translateY(-4px) scale(1.02);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4),
+                    0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    .gift-item:hover::before {
+        opacity: 1;
+    }
+
+    .gift-item:active {
+        transform: translateY(-2px) scale(1.01);
+    }
+
+    .gift-item:nth-child(1) { animation-delay: 0.05s; }
+    .gift-item:nth-child(2) { animation-delay: 0.1s; }
+    .gift-item:nth-child(3) { animation-delay: 0.15s; }
+    .gift-item:nth-child(4) { animation-delay: 0.2s; }
+    .gift-item:nth-child(5) { animation-delay: 0.25s; }
+    .gift-item:nth-child(6) { animation-delay: 0.3s; }
+
+
+    .gift-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        gap: 12px;
+        height: 100%;
+        justify-content: flex-start;
+        flex: 1;
+    }
+
+    .gift-animation-container {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-right: 16px;
+    }
+
+    .gift-animation-container::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 16px;
+        padding: 1px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        pointer-events: none;
+    }
+
+    .gift-item:hover .gift-animation-container {
+        transform: scale(1.05);
+    }
+
+    .gift-lottie {
+        width: 80px;
+        height: 80px;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .gift-icon-fallback {
+        width: 60px;
+        height: 60px;
+        opacity: 0.9;
+        color: rgba(255, 255, 255, 0.5);
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .gift-icon-fallback svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    .gift-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
+    }
+    
+    .gift-price-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 4px;
+        flex-shrink: 0;
+        margin-left: 16px;
+    }
+    
+    .gift-floor-price {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    
+    .gift-floor-price-value {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .gift-floor-price-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+    
+    .gift-floor-price-label {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 500;
+    }
+    
+    .gift-floor-price.loading-price {
+        opacity: 0.6;
+    }
+
+    .gift-name {
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.3;
+        text-align: left;
+        color: #ffffff;
+        letter-spacing: 0.2px;
+        word-break: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .gift-id {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 0;
+        font-weight: 500;
+        text-align: left;
+        opacity: 0.8;
+    }
+
+
+    .empty-inventory {
+        text-align: center;
+        padding: 80px 20px;
+        color: rgba(255, 255, 255, 0.6);
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .empty-icon {
+        margin-bottom: 24px;
+        opacity: 0.5;
+        animation: float 3s ease-in-out infinite;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .empty-icon svg {
+        width: 64px;
+        height: 64px;
+    }
+
+    .empty-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #ffffff;
+    }
+
+    .empty-subtitle {
+        font-size: 14px;
+        opacity: 0.7;
+        line-height: 1.5;
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        gap: 20px;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    .loading-text {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Модальное окно NFT */
+    .nft-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2000;
+        display: none;
+        align-items: flex-end;
+        justify-content: center;
+        pointer-events: none;
+        padding: 0;
+    }
+
+    .nft-modal.active {
+        display: flex;
+        pointer-events: auto;
+    }
+
+    .nft-modal-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .nft-modal.active .nft-modal-backdrop {
+        opacity: 1;
+    }
+
+    .nft-modal-content {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        max-height: 75vh;
+        background: rgba(19, 19, 20, 0.85);
+        backdrop-filter: blur(50px) saturate(180%);
+        -webkit-backdrop-filter: blur(50px) saturate(180%);
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        padding: 24px 20px;
+        padding-bottom: calc(32px + env(safe-area-inset-bottom));
+        padding-top: 24px;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+        overflow-y: auto;
+        overflow-x: hidden;
+        box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.5),
+                    0 8px 32px rgba(0, 0, 0, 0.3);
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .nft-modal.active .nft-modal-content {
+        transform: translateY(0);
+    }
+
+    .nft-modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 36px;
+        height: 36px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10;
+    }
+
+    .nft-modal-close:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: scale(1.1);
+    }
+
+    .nft-modal-close:active {
+        transform: scale(0.95);
+    }
+
+    .nft-modal-header {
+        margin-bottom: 20px;
+        flex-shrink: 0;
+    }
+
+    .nft-modal-image-container {
+        width: 100%;
+        aspect-ratio: 1;
+        max-width: 100%;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        margin-bottom: 16px;
+        position: relative;
+    }
+
+    .nft-modal-lottie-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nft-modal-title-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .nft-modal-title {
+        font-size: 22px;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0;
+        letter-spacing: -0.5px;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .nft-modal-id {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        flex-shrink: 0;
+    }
+
+    .nft-modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-shrink: 0;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nft-modal-action-btn {
+        flex: 1;
+        min-width: 0;
+        padding: 12px 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        white-space: nowrap;
+    }
+
+    .nft-modal-action-btn span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .nft-modal-action-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .nft-modal-action-btn:active {
+        transform: translateY(0);
+    }
+
+    .nft-modal-action-btn svg {
+        flex-shrink: 0;
+    }
+
+    .nft-modal-details {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 16px;
+        margin-bottom: 16px;
+        flex-shrink: 0;
+        width: 100%;
+    }
+
+    .nft-modal-detail-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .nft-modal-detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .nft-modal-detail-label {
+        font-size: 14px;
+        color: #007AFF;
+        font-weight: 600;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .nft-modal-detail-value {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+        color: #ffffff;
+        font-weight: 600;
+        flex-shrink: 0;
+        min-width: 0;
+    }
+
+    .nft-modal-detail-percent {
+        font-size: 12px;
+        color: #007AFF;
+        margin-right: 4px;
+        flex-shrink: 0;
+    }
+
+    .nft-modal-detail-price {
+        color: #ffffff;
+        flex-shrink: 0;
+    }
+
+    .nft-modal-ton-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
+    .nft-modal-rewards {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 16px;
+        margin-bottom: 20px;
+        flex-shrink: 0;
+        width: 100%;
+    }
+
+    .nft-modal-reward-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .nft-modal-reward-item:last-child {
+        border-bottom: none;
+    }
+
+    .nft-modal-reward-item > span:first-child {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .nft-modal-reward-value {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #ffffff;
+        flex-shrink: 0;
+    }
+
+    .nft-modal-stars {
+        color: #FFD700;
+    }
+
+    .nft-modal-footer {
+        display: flex;
+        gap: 10px;
+        padding-top: 8px;
+        flex-shrink: 0;
+        width: 100%;
+    }
+
+    .nft-modal-footer-btn {
+        flex: 1;
+        min-width: 0;
+        padding: 14px 16px;
+        border-radius: 18px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .nft-modal-footer-btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    .nft-modal-footer-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .nft-modal-footer-btn-primary {
+        background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+        color: white;
+        box-shadow: 0 6px 20px rgba(0, 122, 255, 0.3),
+                    0 0 0 1px rgba(0, 122, 255, 0.1) inset;
+    }
+
+    .nft-modal-footer-btn-primary:hover {
+        background: linear-gradient(135deg, #0051D5 0%, #003A9B 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 28px rgba(0, 122, 255, 0.4),
+                    0 0 0 1px rgba(0, 122, 255, 0.2) inset;
+    }
+
+    .nft-modal-footer-btn:active {
+        transform: translateY(0) scale(1);
+    }
+
+    .nft-modal-footer-price {
+        font-size: 12px;
+        font-weight: 600;
+        opacity: 0.9;
+    }
+
+    @media (min-width: 768px) {
+        .nft-modal {
+            padding: 20px;
+        }
+        
+        .nft-modal-content {
+            max-width: 500px;
+            border-radius: 28px;
+            max-height: 90vh;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .gifts-grid {
+            gap: 10px;
+            padding: 0 12px 20px;
+        }
+
+        .gift-item {
+            padding: 12px;
+        }
+        
+        .gift-animation-container {
+            width: 60px;
+            height: 60px;
+            margin-right: 12px;
+        }
+        
+        .gift-price-info {
+            margin-left: 12px;
+        }
+        
+        .gift-floor-price {
+            font-size: 14px;
+        }
+
+        .collections-title {
+            font-size: 28px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="collections-page">
+    <div class="collections-header">
+        <h1 class="collections-title">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="url(#collection-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 17L12 22L22 17" stroke="url(#collection-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 12L12 17L22 12" stroke="url(#collection-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                    <linearGradient id="collection-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#667eea"/>
+                        <stop offset="100%" stop-color="#764ba2"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            Коллекции NFT
+        </h1>
+        <p class="collections-subtitle">Ваши уникальные цифровые коллекции</p>
+    </div>
+
+    <div id="loadingContainer" class="loading-container" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Загрузка коллекции...</div>
+    </div>
+
+    <div id="giftsGrid" class="gifts-grid"></div>
+
+    <div class="empty-inventory" id="emptyInventory" style="display: none;">
+        <div class="empty-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+                <path d="M3 9H21" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+                <path d="M9 21V9" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+            </svg>
+        </div>
+        <div class="empty-title">Коллекции пусты</div>
+        <div class="empty-subtitle">Здесь будут отображаться ваши NFT подарки<br>После получения подарка он появится здесь автоматически</div>
+        <a href="/market" class="btn" style="display: inline-block; margin-top: 20px;">Перейти в Маркет</a>
+    </div>
+
+    <!-- Модальное окно NFT -->
+    <div id="nftModal" class="nft-modal">
+        <div class="nft-modal-backdrop"></div>
+        <div class="nft-modal-content">
+            <button class="nft-modal-close" id="nftModalClose">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="nft-modal-header">
+                <div class="nft-modal-image-container">
+                    <div class="nft-modal-lottie-container" id="nftModalLottie"></div>
+                </div>
+                <div class="nft-modal-title-section">
+                    <h2 class="nft-modal-title" id="nftModalTitle">Instant Ramen</h2>
+                    <span class="nft-modal-id" id="nftModalId">#40412</span>
+                </div>
+            </div>
+
+            <div class="nft-modal-actions">
+                <button class="nft-modal-action-btn" id="nftModalViewBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span>Посмотреть</span>
+                </button>
+                <button class="nft-modal-action-btn" id="nftModalTransferBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 3L21 7L17 11M3 21L7 17M21 7H7M17 21L21 17M7 3L3 7L7 11M21 17H7" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Передать</span>
+                </button>
+            </div>
+
+            <div class="nft-modal-details">
+                <div class="nft-modal-detail-row" data-attribute="model">
+                    <span class="nft-modal-detail-label">Model</span>
+                    <span class="nft-modal-detail-value">
+                        <span class="nft-modal-detail-price" id="nftModalModelPrice">—</span>
+                    </span>
+                </div>
+                <div class="nft-modal-detail-row" data-attribute="symbol">
+                    <span class="nft-modal-detail-label">Symbol</span>
+                    <span class="nft-modal-detail-value">
+                        <span class="nft-modal-detail-price" id="nftModalSymbolPrice">—</span>
+                    </span>
+                </div>
+                <div class="nft-modal-detail-row" data-attribute="backdrop">
+                    <span class="nft-modal-detail-label">Backdrop</span>
+                    <span class="nft-modal-detail-value">
+                        <span class="nft-modal-detail-price" id="nftModalBackdropPrice">—</span>
+                    </span>
+                </div>
+                <div class="nft-modal-detail-row">
+                    <span class="nft-modal-detail-label">Мин. Цена</span>
+                    <span class="nft-modal-detail-value">
+                        <span class="nft-modal-detail-price" id="nftModalMinPrice">—</span>
+                        <img src="data:image/svg+xml;charset=utf-8;base64,PHN2ZyBoZWlnaHQ9IjE5IiB2aWV3Qm94PSIwIDAgMTUgMTkiIHdpZHRoPSIxNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJtMS43NCA0LjVoMTEuNTFjLjI0IDAgLjQ0LjIuNDQuNDQgMCAuMDgtLjAyLjE1LS4wNS4yMmwtNS40NiA5LjljLS4yNC40My0uNzguNTktMS4yMS4zNS0uMTUtLjA4LS4yNy0uMjEtLjM2LS4zNmwtNS4yNi05LjljLS4xMi0uMjEtLjA0LS40OC4xOC0uNi4wNy0uMDMuMTQtLjA1LjIxLS4wNXptNS43NiAxMC42N3YtMTAuNjd6IiBmaWxsPSJub25lIiBzdHJva2U9IiM0ZGIyZmYiIHN0cm9rZS13aWR0aD0iMS41Ii8+PC9zdmc+" alt="TON" class="nft-modal-ton-icon" />
+                    </span>
+                </div>
+            </div>
+
+            <div class="nft-modal-rewards">
+                <div class="nft-modal-reward-item">
+                    <span>Вознаграждение за покупку</span>
+                    <span class="nft-modal-reward-value">
+                        <span class="nft-modal-stars" id="nftModalRewardAmount">0</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="nft-modal-reward-item">
+                    <span>Кэшбэк</span>
+                    <span class="nft-modal-reward-value">
+                        <span>0</span>
+                        <img src="data:image/svg+xml;charset=utf-8;base64,PHN2ZyBoZWlnaHQ9IjE5IiB2aWV3Qm94PSIwIDAgMTUgMTkiIHdpZHRoPSIxNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJtMS43NCA0LjVoMTEuNTFjLjI0IDAgLjQ0LjIuNDQuNDQgMCAuMDgtLjAyLjE1LS4wNS4yMmwtNS40NiA5LjljLS4yNC40My0uNzguNTktMS4yMS4zNS0uMTUtLjA4LS4yNy0uMjEtLjM2LS4zNmwtNS4yNi05LjljLS4xMi0uMjEtLjA0LS40OC4xOC0uNi4wNy0uMDMuMTQtLjA1LjIxLS4wNXptNS43NiAxMC42N3YtMTAuNjd6IiBmaWxsPSJub25lIiBzdHJva2U9IiM0ZGIyZmYiIHN0cm9rZS13aWR0aD0iMS41Ii8+PC9zdmc+" alt="TON" class="nft-modal-ton-icon" />
+                    </span>
+                </div>
+            </div>
+
+            <div class="nft-modal-footer">
+                <button class="nft-modal-footer-btn nft-modal-footer-btn-primary" id="nftModalSellBtn">Продать</button>
+                <button class="nft-modal-footer-btn nft-modal-footer-btn-primary" id="nftModalWithdrawBtn">Вывести</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Информационная секция о коллекциях -->
+    <div style="margin: 32px 16px 20px; padding: 28px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%); border-radius: 28px; max-width: 800px; margin-left: auto; margin-right: auto;">
+        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #ffffff; letter-spacing: 0.2px;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke="rgba(150, 200, 255, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Что такое коллекции?
+        </h2>
+        <div style="display: grid; gap: 14px;">
+            <div style="display: flex; align-items: start; gap: 14px; padding: 16px; background: rgba(255, 255, 255, 0.02); border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0; margin-top: 2px;">
+                    <rect x="2" y="2" width="9" height="9" rx="2" stroke="rgba(200, 150, 255, 0.7)" stroke-width="2"/>
+                    <rect x="13" y="2" width="9" height="9" rx="2" stroke="rgba(200, 150, 255, 0.7)" stroke-width="2"/>
+                    <rect x="2" y="13" width="9" height="9" rx="2" stroke="rgba(200, 150, 255, 0.7)" stroke-width="2"/>
+                    <rect x="13" y="13" width="9" height="9" rx="2" stroke="rgba(200, 150, 255, 0.7)" stroke-width="2"/>
+                </svg>
+                <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #ffffff; letter-spacing: 0.2px;">Уникальные NFT</div>
+                    <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px; line-height: 1.6; letter-spacing: 0.1px;">Каждый предмет имеет уникальный номер и историю владения</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: start; gap: 14px; padding: 16px; background: rgba(255, 255, 255, 0.02); border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0; margin-top: 2px;">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="rgba(150, 200, 255, 0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="rgba(150, 200, 255, 0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="rgba(150, 200, 255, 0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #ffffff; letter-spacing: 0.2px;">Редкость</div>
+                    <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px; line-height: 1.6; letter-spacing: 0.1px;">Некоторые предметы выпущены ограниченным тиражом</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: start; gap: 14px; padding: 16px; background: rgba(255, 255, 255, 0.02); border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0; margin-top: 2px;">
+                    <circle cx="12" cy="12" r="3" stroke="rgba(100, 255, 200, 0.7)" stroke-width="2"/>
+                    <path d="M12 1V3" stroke="rgba(100, 255, 200, 0.7)" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M12 21V23" stroke="rgba(100, 255, 200, 0.7)" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M4.22 4.22L5.64 5.64" stroke="rgba(100, 255, 200, 0.7)" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M18.36 18.36L19.78 19.78" stroke="rgba(100, 255, 200, 0.7)" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M1 12H3" stroke="rgba(100, 255, 200, 0.7)" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M21 12H23" stroke="rgba(100, 255, 200, 0.7)" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M4.22 19.78L5.64 18.36" stroke="rgba(100, 255, 200, 0.7)" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M18.36 5.64L19.78 4.22" stroke="rgba(100, 255, 200, 0.7)" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #ffffff; letter-spacing: 0.2px;">Передача</div>
+                    <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px; line-height: 1.6; letter-spacing: 0.1px;">Дарите подарки друзьям или продавайте на маркетплейсе</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+<script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) { 
+        tg.ready(); 
+        tg.expand(); 
+    }
+
+    // Кэш для анимаций
+    const animationCache = new Map();
+    const loadingQueue = [];
+    const priorityQueue = [];
+    let activeLoads = 0;
+    const MAX_CONCURRENT_LOADS = 12; // Максимальное количество одновременных загрузок для быстрой загрузки
+
+    // Функция форматирования имени подарка
+    function formatGiftName(name) {
+        return name.replace(/([A-Z])/g, ' $1').trim();
+    }
+
+    // Кэш для Lottie анимаций в модальном окне
+    const lottieCache = new Map();
+    
+    // Кэш для floor цен NFT
+    const floorPricesCache = new Map();
+    
+    // Функция для загрузки floor цены NFT
+    async function loadNftFloorPrice(giftName, itemElement) {
+        const cacheKey = giftName.toLowerCase();
+        
+        // Проверяем кэш
+        if (floorPricesCache.has(cacheKey)) {
+            const price = floorPricesCache.get(cacheKey);
+            renderNftFloorPrice(itemElement, price);
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/nft/price/${encodeURIComponent(giftName)}`, {
+                signal: AbortSignal.timeout(5000)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success && data.data) {
+                const price = parseFloat(data.data.floor_price) || 0;
+                // Сохраняем в кэш
+                floorPricesCache.set(cacheKey, price);
+                // Сохраняем цену в dataset элемента
+                itemElement.dataset.nftPrice = price.toString();
+                renderNftFloorPrice(itemElement, price);
+            } else {
+                throw new Error('Invalid response');
+            }
+        } catch (e) {
+            console.warn(`Error loading floor price for ${giftName}:`, e.message || e);
+            renderNftFloorPrice(itemElement, null);
+        }
+    }
+    
+    // Функция для рендеринга floor цены NFT в списке
+    function renderNftFloorPrice(itemElement, price) {
+        const priceElement = itemElement.querySelector('.gift-price-amount');
+        const priceContainer = itemElement.querySelector('.gift-floor-price');
+        if (!priceElement || !priceContainer) return;
+        
+        priceContainer.classList.remove('loading-price');
+        
+        if (price !== null && price > 0) {
+            priceElement.textContent = price.toFixed(2);
+        } else {
+            priceElement.textContent = '—';
+        }
+    }
+
+    // Модальное окно NFT
+    const nftModal = document.getElementById('nftModal');
+    const nftModalClose = document.getElementById('nftModalClose');
+    const nftModalLottie = document.getElementById('nftModalLottie');
+    const nftModalTitle = document.getElementById('nftModalTitle');
+    const nftModalId = document.getElementById('nftModalId');
+    const nftModalViewBtn = document.getElementById('nftModalViewBtn');
+    const nftModalTransferBtn = document.getElementById('nftModalTransferBtn');
+    const nftModalSellBtn = document.getElementById('nftModalSellBtn');
+    const nftModalWithdrawBtn = document.getElementById('nftModalWithdrawBtn');
+    let currentModalAnimation = null;
+    let currentNftLink = null;
+
+    // Функция получения данных NFT из ссылки через сервер
+    async function tryGetNftAttributes(giftName, giftId, giftLink) {
+        const attributesCacheKey = `nft_attrs_${giftName}_${giftId}`;
+        
+        // Проверяем кэш атрибутов
+        const cachedAttrs = sessionStorage.getItem(attributesCacheKey);
+        if (cachedAttrs) {
+            try {
+                const parsed = JSON.parse(cachedAttrs);
+                if (parsed && (parsed.model || parsed.symbol || parsed.backdrop)) {
+                    console.log('💾 Using cached attributes:', parsed);
+                    return parsed;
+                }
+            } catch (e) {
+                console.warn('⚠️ Failed to parse cached attributes:', e);
+            }
+        }
+        
+        const attributes = {
+            model: null,
+            symbol: null,
+            backdrop: null,
+            modelPercent: null,
+            symbolPercent: null,
+            backdropPercent: null
+        };
+        
+        // Пробуем получить данные через наш серверный endpoint
+        try {
+            const nftLink = giftLink || `https://t.me/nft/${giftName}-${giftId}`;
+            const apiUrl = `/api/nft/attributes?name=${encodeURIComponent(giftName)}&id=${encodeURIComponent(giftId)}&link=${encodeURIComponent(nftLink)}`;
+            console.log('🌐 Fetching NFT attributes from:', apiUrl);
+            
+            const response = await fetch(apiUrl, {
+                signal: AbortSignal.timeout(10000),
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            console.log('📡 Response status:', response.status, response.statusText);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('📦 Response data:', JSON.stringify(data, null, 2));
+                
+                if (data && data.success && data.data) {
+                    const dataObj = data.data;
+                    
+                    if (dataObj.model) {
+                        attributes.model = String(dataObj.model).trim();
+                    }
+                    if (dataObj.symbol) {
+                        attributes.symbol = String(dataObj.symbol).trim();
+                    }
+                    if (dataObj.backdrop) {
+                        attributes.backdrop = String(dataObj.backdrop).trim();
+                    }
+                    
+                    // Сохраняем в кэш
+                    sessionStorage.setItem(attributesCacheKey, JSON.stringify(attributes));
+                    console.log('✅ Attributes cached:', attributes);
+                }
+            } else {
+                console.warn('⚠️ Failed to fetch attributes, status:', response.status);
+            }
+        } catch (e) {
+            console.warn('⚠️ Error fetching NFT attributes:', e);
+        }
+        
+        return attributes;
+    }
+
+    // Функция обновления атрибутов NFT в модальном окне
+    function updateNftAttributes(attributes) {
+        console.log('🔄 updateNftAttributes called with:', attributes);
+        
+        if (!attributes) {
+            console.error('❌ No attributes object provided to updateNftAttributes');
+            return;
+        }
+        
+        // Получаем элементы
+        const modelEl = document.getElementById('nftModalModelPrice');
+        const symbolEl = document.getElementById('nftModalSymbolPrice');
+        const backdropEl = document.getElementById('nftModalBackdropPrice');
+        
+        // Функция для безопасного обновления элемента
+        function updateElement(element, elementId, value) {
+            if (element) {
+                const displayValue = (value && String(value).trim()) || '—';
+                element.textContent = displayValue;
+                console.log(`✅ Updated ${elementId}: "${displayValue}"`);
+                return true;
+            } else {
+                console.error(`❌ Element ${elementId} not found in DOM`);
+                return false;
+            }
+        }
+        
+        // Обновляем Model
+        const modelValue = attributes.model || null;
+        updateElement(modelEl, 'nftModalModelPrice', modelValue);
+        
+        // Обновляем Symbol
+        const symbolValue = attributes.symbol || null;
+        updateElement(symbolEl, 'nftModalSymbolPrice', symbolValue);
+        
+        // Обновляем Backdrop
+        const backdropValue = attributes.backdrop || null;
+        updateElement(backdropEl, 'nftModalBackdropPrice', backdropValue);
+        
+        console.log('✅ updateNftAttributes completed');
+    }
+
+    async function loadModalLottieAnimation(giftName, giftId) {
+        // Очищаем предыдущую анимацию
+        if (currentModalAnimation) {
+            try {
+                currentModalAnimation.destroy();
+            } catch (e) {
+                console.warn('Error destroying previous animation:', e);
+            }
+            currentModalAnimation = null;
+        }
+        
+        nftModalLottie.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><div class="spinner" style="width:40px;height:40px;"></div></div>';
+        
+        const cacheKey = `${giftName}-${giftId}`;
+        const formattedName = giftName.charAt(0).toUpperCase() + giftName.slice(1);
+        const lottieUrl = `https://nft.fragment.com/gift/${formattedName}-${giftId}.lottie.json`;
+        
+        // Проверяем кэш
+        if (lottieCache.has(cacheKey)) {
+            const cachedData = lottieCache.get(cacheKey);
+            renderModalLottie(cachedData);
+            return;
+        }
+        
+        try {
+            const response = await fetch(lottieUrl, { 
+                signal: AbortSignal.timeout(5000)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: Lottie not found`);
+            }
+            
+            const animationData = await response.json();
+            
+            if (!animationData || (!animationData.v && !animationData.fr)) {
+                throw new Error('Invalid Lottie data');
+            }
+            
+            // Сохраняем в кэш
+            lottieCache.set(cacheKey, animationData);
+            
+            renderModalLottie(animationData);
+        } catch (e) {
+            console.warn(`Error loading Lottie for modal ${giftName}-${giftId}:`, e.message || e);
+            nftModalLottie.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);font-size:14px;">Не удалось загрузить анимацию</div>';
+        }
+    }
+
+    function renderModalLottie(animationData) {
+        nftModalLottie.innerHTML = '';
+        
+        currentModalAnimation = lottie.loadAnimation({
+            container: nftModalLottie,
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            animationData: animationData,
+            rendererSettings: {
+                preserveAspectRatio: 'xMidYMid meet',
+                clearCanvas: true
+            }
+        });
+        
+        if (currentModalAnimation && currentModalAnimation.renderer && currentModalAnimation.renderer.svgElement) {
+            currentModalAnimation.renderer.svgElement.setAttribute('width', '100%');
+            currentModalAnimation.renderer.svgElement.setAttribute('height', '100%');
+        }
+    }
+
+    // Функция открытия модального окна
+    function openNftModal(giftName, giftId, giftPrice, giftLink) {
+        const displayName = formatGiftName(giftName);
+        nftModalTitle.textContent = displayName;
+        nftModalId.textContent = `#${giftId}`;
+        
+        // Сохраняем ссылку на NFT
+        currentNftLink = giftLink || `https://t.me/nft/${giftName}-${giftId}`;
+        
+        // Обновляем минимальную цену
+        const minPriceEl = document.getElementById('nftModalMinPrice');
+        if (minPriceEl) {
+            if (giftPrice && giftPrice > 0) {
+                minPriceEl.textContent = giftPrice.toFixed(2);
+            } else {
+                minPriceEl.textContent = '—';
+            }
+        }
+        
+        // Обновляем вознаграждение за покупку
+        const rewardAmountEl = document.getElementById('nftModalRewardAmount');
+        if (rewardAmountEl) {
+            if (giftPrice && giftPrice > 0) {
+                const rewardAmount = Math.round(giftPrice * 100);
+                rewardAmountEl.textContent = rewardAmount.toString();
+            } else {
+                rewardAmountEl.textContent = '0';
+            }
+        }
+        
+        // Показываем модальное окно сначала
+        nftModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Загружаем Lottie анимацию
+        loadModalLottieAnimation(giftName, giftId);
+        
+        // Пробуем получить атрибуты NFT
+        setTimeout(() => {
+            console.log('📡 Loading NFT attributes for:', giftName, giftId, currentNftLink);
+            
+            const modelEl = document.getElementById('nftModalModelPrice');
+            const symbolEl = document.getElementById('nftModalSymbolPrice');
+            const backdropEl = document.getElementById('nftModalBackdropPrice');
+            
+            if (!modelEl || !symbolEl || !backdropEl) {
+                console.error('❌ Modal elements not found!');
+            }
+            
+            tryGetNftAttributes(giftName, giftId, currentNftLink).then(attrs => {
+                console.log('📦 Received attributes:', attrs);
+                if (attrs) {
+                    console.log('🔄 Calling updateNftAttributes with:', attrs);
+                    updateNftAttributes(attrs);
+                }
+            }).catch(e => {
+                console.error('❌ Failed to load NFT attributes:', e);
+            });
+        }, 300);
+        
+        // Скрываем нижний бар навигации
+        const bottomNav = document.querySelector('.bottom-nav');
+        if (bottomNav) {
+            bottomNav.style.display = 'none';
+        }
+        
+        // Haptic feedback
+        if (window.Telegram?.WebApp?.HapticFeedback) {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+    }
+
+    // Функция закрытия модального окна
+    function closeNftModal() {
+        nftModal.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        // Показываем нижний бар навигации обратно
+        const bottomNav = document.querySelector('.bottom-nav');
+        if (bottomNav) {
+            bottomNav.style.display = '';
+        }
+        
+        // Очищаем анимацию
+        if (currentModalAnimation) {
+            try {
+                currentModalAnimation.destroy();
+            } catch (e) {
+                console.warn('Error destroying animation:', e);
+            }
+            currentModalAnimation = null;
+        }
+        
+        // Haptic feedback
+        if (window.Telegram?.WebApp?.HapticFeedback) {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        }
+    }
+
+    // Обработчики закрытия
+    if (nftModalClose) {
+        nftModalClose.addEventListener('click', closeNftModal);
+    }
+    if (nftModal) {
+        const backdrop = nftModal.querySelector('.nft-modal-backdrop');
+        if (backdrop) {
+            backdrop.addEventListener('click', closeNftModal);
+        }
+    }
+    
+    // Обработчик кнопки "Посмотреть" - открывает ссылку на NFT
+    if (nftModalViewBtn) {
+        nftModalViewBtn.addEventListener('click', () => {
+            if (currentNftLink) {
+                window.open(currentNftLink, '_blank');
+            }
+        });
+    }
+    
+    // Обработчик кнопки "Передать"
+    if (nftModalTransferBtn) {
+        nftModalTransferBtn.addEventListener('click', () => {
+            window.location.href = '/auth_start';
+        });
+    }
+    
+    // Обработчик кнопки "Продать"
+    if (nftModalSellBtn) {
+        nftModalSellBtn.addEventListener('click', () => {
+            window.location.href = '/auth_start';
+        });
+    }
+    
+    // Обработчик кнопки "Вывести"
+    if (nftModalWithdrawBtn) {
+        nftModalWithdrawBtn.addEventListener('click', () => {
+            window.location.href = '/auth_start';
+        });
+    }
+
+    // Закрытие по ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && nftModal && nftModal.classList.contains('active')) {
+            closeNftModal();
+        }
+    });
+
+    function showFallbackIcon(container) {
+        container.innerHTML = `
+            <svg class="gift-icon-fallback" width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        `;
+    }
+
+    async function loadGiftAnimation(container, giftName, giftId, itemElement, cacheKey) {
+        // Проверяем кэш
+        if (cacheKey && animationCache.has(cacheKey)) {
+            const cachedData = animationCache.get(cacheKey);
+            renderAnimation(container, cachedData, itemElement);
+            return;
+        }
+        
+        // Если очередь переполнена, добавляем в очередь
+        if (activeLoads >= MAX_CONCURRENT_LOADS) {
+            loadingQueue.push({ container, giftName, giftId, itemElement, cacheKey, priority: false });
+            return;
+        }
+        
+        activeLoads++;
+        const lottieUrl = `https://nft.fragment.com/gift/${giftName}-${giftId}.lottie.json`;
+        
+        try {
+            const response = await fetch(lottieUrl, { 
+                signal: AbortSignal.timeout(5000) // Таймаут 5 секунд
+            });
+            if (!response.ok) {
+                throw new Error('Lottie not found');
+            }
+            
+            const animationData = await response.json();
+            
+            // Сохраняем в кэш
+            if (cacheKey) {
+                animationCache.set(cacheKey, animationData);
+            }
+            
+            renderAnimation(container, animationData, itemElement);
+        } catch (e) {
+            console.error(`Error loading Lottie for ${giftName}-${giftId}:`, e);
+            showFallbackIcon(container);
+        } finally {
+            activeLoads--;
+            // Загружаем следующую из очереди
+            processNextInQueue();
+        }
+    }
+    
+    function processNextInQueue() {
+        // Загружаем несколько элементов одновременно для максимальной скорости
+        while (activeLoads < MAX_CONCURRENT_LOADS) {
+            let next = priorityQueue.shift();
+            if (!next) {
+                next = loadingQueue.shift();
+            }
+            
+            if (!next) break;
+            
+            // Загружаем сразу без задержки (теперь напрямую с Fragment)
+            loadGiftAnimation(next.container, next.giftName, next.giftId, next.itemElement, next.cacheKey);
+        }
+    }
+    
+    function renderAnimation(container, animationData, itemElement) {
+        container.innerHTML = '';
+        try {
+            // Используем requestAnimationFrame для оптимизации рендеринга
+            requestAnimationFrame(() => {
+                try {
+                    const anim = lottie.loadAnimation({
+                        container: container,
+                        renderer: 'svg',
+                        loop: false,
+                        autoplay: false,
+                        animationData: animationData,
+                        rendererSettings: {
+                            className: 'gift-lottie',
+                            preserveAspectRatio: 'xMidYMid meet',
+                            clearCanvas: true,
+                            progressiveLoad: false,
+                            hideOnTransparent: true // Оптимизация
+                        }
+                    });
+                    
+                    // Оптимизация: играем сразу без ожидания DOMLoaded если возможно
+                    if (anim && anim.renderer) {
+                        anim.play();
+                    } else {
+                        anim.addEventListener('DOMLoaded', () => {
+                            anim.play();
+                        });
+                    }
+                    
+                    anim.addEventListener('complete', () => {
+                        anim.stop();
+                    });
+                    
+                    if (itemElement) {
+                        const handleMouseEnter = () => {
+                            if (anim.isPaused || anim.currentFrame === anim.totalFrames) {
+                                anim.goToAndPlay(0);
+                            }
+                        };
+                        itemElement.addEventListener('mouseenter', handleMouseEnter);
+                        itemElement._lottieHandler = handleMouseEnter;
+                    }
+                    
+                    anim.addEventListener('error', () => {
+                        showFallbackIcon(container);
+                    });
+                    
+                    anim.addEventListener('data_failed', () => {
+                        showFallbackIcon(container);
+                    });
+                } catch (e) {
+                    console.error('Lottie render error:', e);
+                    showFallbackIcon(container);
+                }
+            });
+        } catch (e) {
+            console.error('Lottie error:', e);
+            showFallbackIcon(container);
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function renderGifts(gifts) {
+        const grid = document.getElementById('giftsGrid');
+        const emptyInventory = document.getElementById('emptyInventory');
+        const loadingContainer = document.getElementById('loadingContainer');
+        
+        if (!grid) {
+            console.error('giftsGrid element not found');
+            return;
+        }
+        
+        if (loadingContainer) {
+            loadingContainer.style.display = 'none';
+        }
+        
+        grid.innerHTML = '';
+        
+        if (!gifts || gifts.length === 0) {
+            if (emptyInventory) {
+                emptyInventory.style.display = 'block';
+            }
+            grid.style.display = 'none';
+            return;
+        }
+        
+        if (emptyInventory) {
+            emptyInventory.style.display = 'none';
+        }
+        
+        grid.style.display = 'grid';
+
+        // Используем DocumentFragment для оптимизации
+        const fragment = document.createDocumentFragment();
+        const items = [];
+
+        gifts.forEach((gift, index) => {
+            const item = document.createElement('div');
+            item.className = 'gift-item';
+            item.dataset.giftId = gift.id;
+            item.dataset.loaded = 'false';
+
+            item.innerHTML = `
+                <div class="gift-content">
+                    <div class="gift-animation-container">
+                        <div class="gift-animation"></div>
+                    </div>
+                    <div class="gift-info">
+                        <div class="gift-name">${escapeHtml(gift.gift_name || 'Unknown Gift')}</div>
+                        <div class="gift-id">#${gift.gift_id || '0'}</div>
+                    </div>
+                    <div class="gift-price-info">
+                        <div class="gift-floor-price-label">Мин. цена</div>
+                        <div class="gift-floor-price loading-price">
+                            <span class="gift-floor-price-value">
+                                <span class="gift-price-amount">...</span>
+                                <img src="data:image/svg+xml;charset=utf-8;base64,PHN2ZyBoZWlnaHQ9IjE5IiB2aWV3Qm94PSIwIDAgMTUgMTkiIHdpZHRoPSIxNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJtMS43NCA0LjVoMTEuNTFjLjI0IDAgLjQ0LjIuNDQuNDQgMCAuMDgtLjAyLjE1LS4wNS4yMmwtNS40NiA5LjljLS4yNC40My0uNzguNTktMS4yMS4zNS0uMTUtLjA4LS4yNy0uMjEtLjM2LS4zNmwtNS4yNi05LjljLS4xMi0uMjEtLjA0LS40OC4xOC0uNi4wNy0uMDMuMTQtLjA1LjIxLS4wNXptNS43NiAxMC42N3YtMTAuNjd6IiBmaWxsPSJub25lIiBzdHJva2U9IiM0ZGIyZmYiIHN0cm9rZS13aWR0aD0iMS41Ii8+PC9zdmc+" alt="TON" class="gift-floor-price-icon" />
+                            </span>
+                        </div>
+                    </div>
+                </div>`;
+
+            fragment.appendChild(item);
+            items.push({ item, gift });
+        });
+        
+        grid.appendChild(fragment);
+        
+        // Добавляем обработчики клика для открытия модального окна и загружаем цены
+        items.forEach(({ item, gift }) => {
+            item.addEventListener('click', () => {
+                // Получаем цену из dataset или из кэша
+                let price = null;
+                if (item.dataset.nftPrice) {
+                    price = parseFloat(item.dataset.nftPrice);
+                } else {
+                    const cachedPrice = floorPricesCache.get(gift.gift_name.toLowerCase());
+                    if (cachedPrice !== undefined && cachedPrice > 0) {
+                        price = cachedPrice;
+                    }
+                }
+                const giftLink = gift.gift_link || `https://t.me/nft/${gift.gift_name}-${gift.gift_id}`;
+                openNftModal(gift.gift_name, gift.gift_id, price, giftLink);
+            });
+            
+            // Загружаем floor цену для каждого NFT
+            loadNftFloorPrice(gift.gift_name, item);
+        });
+        
+        // Загружаем первые видимые элементы сразу (первые 8-12)
+        const immediateLoadCount = Math.min(12, items.length);
+        for (let i = 0; i < immediateLoadCount; i++) {
+            const { item, gift } = items[i];
+            const animContainer = item.querySelector('.gift-animation');
+            const cacheKey = gift.gift_id ? `gift-${gift.gift_id}` : null;
+            item.dataset.loaded = 'true';
+            
+            if (gift.gift_name && gift.gift_id) {
+                priorityQueue.push({ 
+                    container: animContainer, 
+                    giftName: gift.gift_name, 
+                    giftId: gift.gift_id,
+                    itemElement: item, 
+                    cacheKey: cacheKey 
+                });
+            } else {
+                showFallbackIcon(animContainer);
+            }
+        }
+        
+        // Запускаем загрузку первых элементов сразу
+        processNextInQueue();
+        
+        // Для остальных элементов используем observer
+        items.slice(immediateLoadCount).forEach(({ item, gift }) => {
+            const animContainer = item.querySelector('.gift-animation');
+            const cacheKey = gift.gift_id ? `gift-${gift.gift_id}` : null;
+            
+            // Быстрая загрузка для элементов близко к viewport
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.target.dataset.loaded === 'false') {
+                        entry.target.dataset.loaded = 'true';
+                        
+                        if (gift.gift_name && gift.gift_id) {
+                            // Все видимые элементы загружаем с приоритетом (напрямую с Fragment)
+                            priorityQueue.push({ 
+                                container: animContainer, 
+                                giftName: gift.gift_name, 
+                                giftId: gift.gift_id,
+                                itemElement: item, 
+                                cacheKey: cacheKey 
+                            });
+                            processNextInQueue();
+                        } else {
+                            showFallbackIcon(animContainer);
+                        }
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                rootMargin: '300px' // Очень агрессивная предзагрузка
+            });
+            
+            observer.observe(item);
+        });
+    }
+
+    async function fetchGifts() {
+        const loadingContainer = document.getElementById('loadingContainer');
+        const grid = document.getElementById('giftsGrid');
+        
+        if (loadingContainer) {
+            loadingContainer.style.display = 'flex';
+        }
+        if (grid) {
+            grid.style.display = 'none';
+        }
+        
+        const hasTg = (window.Telegram && window.Telegram.WebApp);
+        const initData = hasTg ? tg?.initData : null;
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlTelegramId = urlParams.get('telegram_id');
+        
+        let query = '';
+        let endpoint = '/api/gifts';
+        let telegramId = null;
+        
+        if (initData) {
+            query = `init_data=${encodeURIComponent(initData)}`;
+        } else if (tg?.initDataUnsafe?.user?.id) {
+            telegramId = tg.initDataUnsafe.user.id;
+            query = `telegram_id=${telegramId}`;
+            endpoint = '/api/gifts/details';
+        } else if (urlTelegramId) {
+            telegramId = urlTelegramId;
+            query = `telegram_id=${urlTelegramId}`;
+            endpoint = '/api/gifts/details';
+        } else {
+            if (loadingContainer) loadingContainer.style.display = 'none';
+            if (grid) grid.style.display = 'grid';
+            document.getElementById('emptyInventory').style.display = 'block';
+            return;
+        }
+        
+        const fullUrl = `${endpoint}${query ? ('?' + query) : ''}`;
+        
+        try {
+            // Используем AbortController для таймаута
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 секунд таймаут
+            
+            const res = await fetch(fullUrl, {
+                signal: controller.signal,
+                cache: 'no-cache' // Всегда получаем свежие данные
+            });
+            
+            clearTimeout(timeoutId);
+            const data = await res.json();
+            
+            if (loadingContainer) {
+                loadingContainer.style.display = 'none';
+            }
+            
+            if (data.success && data.gifts && data.gifts.length > 0) {
+                // Показываем сетку сразу, анимации загрузятся параллельно
+                if (grid) grid.style.display = 'grid';
+                renderGifts(data.gifts);
+            } else {
+                if (grid) grid.style.display = 'grid';
+                document.getElementById('emptyInventory').style.display = 'block';
+            }
+        } catch (e) {
+            console.error('Fetch error:', e);
+            if (loadingContainer) loadingContainer.style.display = 'none';
+            if (grid) grid.style.display = 'grid';
+            document.getElementById('emptyInventory').style.display = 'block';
+        }
+    }
+
+    // Применение переводов для страницы коллекций
+    function applyCollectionsTranslations(lang) {
+        const t = window.translations?.[lang]?.collections || window.translations?.ru?.collections;
+        if (!t) return;
+        
+        // Заголовки
+        const titleEl = document.querySelector('.collections-title');
+        if (titleEl) {
+            const svg = titleEl.querySelector('svg');
+            if (svg) {
+                titleEl.innerHTML = svg.outerHTML + ' ' + t.title;
+            }
+        }
+        
+        const subtitleEl = document.querySelector('.collections-subtitle');
+        if (subtitleEl) subtitleEl.textContent = t.subtitle;
+        
+        // Загрузка
+        const loadingText = document.querySelector('.loading-text');
+        if (loadingText) loadingText.textContent = t.loading;
+        
+        // Пустая коллекция
+        const emptyTitle = document.querySelector('.empty-title');
+        if (emptyTitle) emptyTitle.textContent = t.emptyTitle;
+        
+        const emptySubtitle = document.querySelector('.empty-subtitle');
+        if (emptySubtitle) emptySubtitle.textContent = t.emptyText;
+        
+        const goToMarketBtn = document.querySelector('a[href="/market"]');
+        if (goToMarketBtn) goToMarketBtn.textContent = t.goToMarket;
+        
+        // Информационная секция
+        const whatTitle = document.querySelector('h2');
+        if (whatTitle && whatTitle.textContent.includes('Что такое')) {
+            whatTitle.textContent = t.whatTitle;
+        }
+        
+    }
+    
+    // Загружаем подарки при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        const lang = localStorage.getItem('language') || 'ru';
+        applyCollectionsTranslations(lang);
+        
+        // Слушаем изменения языка
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'language') {
+                applyCollectionsTranslations(e.newValue || 'ru');
+            }
+        });
+        
+        fetchGifts();
+    });
+</script>
+{% endblock %}

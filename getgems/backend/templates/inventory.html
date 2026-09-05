@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+
+{% block title %}Коллекции - GetGems{% endblock %}
+
+{% block styles %}
+<style>
+    .inventory-header {
+        padding: 24px 16px;
+        text-align: center;
+        background: linear-gradient(180deg, rgba(19, 19, 20, 0.95) 0%, transparent 100%);
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .inventory-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .inventory-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        font-weight: 400;
+    }
+
+    .gifts-grid {
+        padding: 0 16px 20px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .gift-item {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        transition: all var(--transition-base);
+        box-shadow: var(--shadow-md);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        animation: slideUp 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .gift-item:nth-child(1) { animation-delay: 0.1s; }
+    .gift-item:nth-child(2) { animation-delay: 0.2s; }
+    .gift-item:nth-child(3) { animation-delay: 0.3s; }
+    .gift-item:nth-child(4) { animation-delay: 0.4s; }
+    .gift-item:nth-child(5) { animation-delay: 0.5s; }
+    .gift-item:nth-child(6) { animation-delay: 0.6s; }
+
+    .gift-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--accent-gradient);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform var(--transition-base);
+    }
+
+    .gift-item:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--shadow-lg);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .gift-item:hover::before {
+        transform: scaleX(1);
+    }
+
+    .gift-item:active {
+        transform: translateY(-4px) scale(1.01);
+    }
+
+    .gift-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            radial-gradient(circle at 20% 20%, rgba(255,255,255,0.03) 2px, transparent 2px),
+            radial-gradient(circle at 80% 80%, rgba(255,255,255,0.03) 2px, transparent 2px);
+        background-size: 40px 40px, 60px 60px;
+        pointer-events: none;
+        border-radius: var(--radius-xl);
+        opacity: 0.5;
+    }
+
+    .gift-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+        height: 100%;
+        justify-content: space-between;
+        flex: 1;
+    }
+
+    .gift-animation-container {
+        width: 140px;
+        height: 140px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+        position: relative;
+        flex-shrink: 0;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        transition: all var(--transition-base);
+    }
+
+    .gift-item:hover .gift-animation-container {
+        background: rgba(255, 255, 255, 0.08);
+        transform: scale(1.05);
+    }
+
+    .gift-lottie {
+        width: 120px;
+        height: 120px;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .gift-icon-fallback {
+        width: 60px;
+        height: 60px;
+        opacity: 0.9;
+        color: var(--text-secondary);
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .gift-icon-fallback svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    .gift-info {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-grow: 1;
+    }
+
+    .gift-name {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 0;
+        line-height: 1.3;
+        text-align: center;
+        color: var(--text-primary);
+        word-break: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .gift-id {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 0;
+        font-weight: 500;
+        text-align: center;
+        opacity: 0.8;
+    }
+
+    .gift-actions {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+
+    .btn-withdraw {
+        width: 100%;
+        background: var(--accent-primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-base);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-withdraw::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-withdraw:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-withdraw:hover {
+        background: #0056CC;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+    }
+
+    .btn-withdraw:active {
+        transform: translateY(0);
+    }
+
+    .btn-withdraw:disabled {
+        background: var(--text-tertiary);
+        cursor: not-allowed;
+        transform: none;
+        opacity: 0.6;
+    }
+
+    .empty-inventory {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--text-secondary);
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .empty-icon {
+        margin-bottom: 24px;
+        opacity: 0.5;
+        animation: float 3s ease-in-out infinite;
+        color: var(--text-secondary);
+    }
+    
+    .empty-icon svg {
+        width: 64px;
+        height: 64px;
+    }
+
+    .empty-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--text-primary);
+    }
+
+    .empty-subtitle {
+        font-size: 14px;
+        opacity: 0.7;
+        line-height: 1.5;
+    }
+
+    /* Уведомления */
+    .notification {
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100px);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 16px 24px;
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        z-index: 2000;
+        opacity: 0;
+        transition: all var(--transition-base);
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        max-width: 90%;
+        text-align: center;
+    }
+
+    .notification.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .notification.success {
+        border-color: #34C759;
+        background: rgba(52, 199, 89, 0.1);
+    }
+
+    .notification.error {
+        border-color: #FF3B30;
+        background: rgba(255, 59, 48, 0.1);
+    }
+
+    /* Loading State */
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        gap: 20px;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-top-color: var(--accent-primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    .loading-text {
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        .gifts-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 12px 20px;
+        }
+
+        .gift-item {
+            min-height: 260px;
+            padding: 16px;
+        }
+
+        .gift-animation-container {
+            width: 120px;
+            height: 120px;
+        }
+
+        .gift-lottie {
+            width: 100px;
+            height: 100px;
+        }
+
+        .inventory-title {
+            font-size: 24px;
+        }
+    }
+
+    /* Shimmer effect for loading */
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    .gift-item.loading {
+        background: linear-gradient(
+            90deg,
+            var(--bg-card) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            var(--bg-card) 100%
+        );
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="MyItemsPage">
+<div class="inventory-header">
+    <h1 class="inventory-title">Мои коллекции</h1>
+    <p class="inventory-subtitle">Управляйте своими NFT подарками</p>
+</div>
+
+<div id="loadingContainer" class="loading-container" style="display: none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Загрузка подарков...</div>
+</div>
+
+<div id="giftsGrid" class="gifts-grid"></div>
+
+    <div class="empty-inventory" id="emptyInventory" style="display: none;">
+        <div class="empty-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 7H16L14 5H10L8 7H4C2.9 7 2 7.9 2 9V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V9C22 7.9 21.1 7 20 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+                <circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+            </svg>
+        </div>
+        <div class="empty-title">Коллекции пусты</div>
+        <div class="empty-subtitle">Здесь будут отображаться ваши NFT подарки<br>После авторизации они появятся автоматически</div>
+</div>
+
+<div id="notification" class="notification"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+<script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) { 
+        tg.ready(); 
+        tg.expand(); 
+    }
+
+    function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    function showFallbackIcon(container) {
+        container.innerHTML = `
+            <svg class="gift-icon-fallback" width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 7H16L14 5H10L8 7H4C2.9 7 2 7.9 2 9V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V9C22 7.9 21.1 7 20 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        `;
+    }
+
+    function loadGiftAnimation(container, animationData) {
+        if (!animationData) {
+            return showFallbackIcon(container);
+        }
+        
+        // Проверяем структуру данных - может быть animationData.data или просто animationData
+        let dataToUse = null;
+        if (animationData.data) {
+            dataToUse = animationData.data;
+        } else if (animationData.v && animationData.fr) {
+            // Это уже данные Lottie (есть версия и частота кадров)
+            dataToUse = animationData;
+        } else {
+            return showFallbackIcon(container);
+        }
+        
+        container.innerHTML = '';
+        try {
+            const anim = lottie.loadAnimation({
+                container: container,
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                animationData: dataToUse,
+                rendererSettings: {
+                    className: 'gift-lottie',
+                    preserveAspectRatio: 'xMidYMid meet'
+                }
+            });
+            
+            anim.addEventListener('error', () => {
+                console.error('Lottie animation error');
+                showFallbackIcon(container);
+            });
+            
+            anim.addEventListener('data_failed', () => {
+                console.error('Lottie data failed');
+                showFallbackIcon(container);
+            });
+        } catch (e) {
+            console.error('Lottie error:', e);
+            showFallbackIcon(container);
+        }
+    }
+
+    function renderGifts(gifts) {
+        const grid = document.getElementById('giftsGrid');
+        const emptyInventory = document.getElementById('emptyInventory');
+        const loadingContainer = document.getElementById('loadingContainer');
+        
+        if (!grid) {
+            console.error('giftsGrid element not found');
+            return;
+        }
+        
+        // Скрываем загрузку
+        if (loadingContainer) {
+            loadingContainer.style.display = 'none';
+        }
+        
+        grid.innerHTML = '';
+        
+        if (!gifts || gifts.length === 0) {
+            if (emptyInventory) {
+                emptyInventory.style.display = 'block';
+            }
+            return;
+        }
+        
+        if (emptyInventory) {
+            emptyInventory.style.display = 'none';
+        }
+
+        gifts.forEach((gift, index) => {
+            const item = document.createElement('div');
+            item.className = 'gift-item';
+            item.dataset.giftId = gift.id;
+            item.style.animationDelay = `${index * 0.1}s`;
+
+            item.innerHTML = `
+                <div class="gift-pattern"></div>
+                <div class="gift-content">
+                    <div class="gift-animation-container">
+                        <div class="gift-animation"></div>
+                    </div>
+                    <div class="gift-info">
+                        <div class="gift-name">${escapeHtml(gift.gift_name || 'Unknown Gift')}</div>
+                        <div class="gift-id">#${gift.gift_id || '0'}</div>
+                    </div>
+                    <div class="gift-actions">
+                        <button class="btn-withdraw" data-gift-id="${gift.id}">Вывести</button>
+                    </div>
+                </div>`;
+
+            grid.appendChild(item);
+            
+            const animContainer = item.querySelector('.gift-animation');
+            if (gift.animation_data) {
+            loadGiftAnimation(animContainer, gift.animation_data);
+            } else {
+                showFallbackIcon(animContainer);
+            }
+
+            const withdrawBtn = item.querySelector('.btn-withdraw');
+            withdrawBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                withdrawGift(gift);
+            });
+        });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async function fetchGifts() {
+        const loadingContainer = document.getElementById('loadingContainer');
+        const grid = document.getElementById('giftsGrid');
+        
+        if (loadingContainer) {
+            loadingContainer.style.display = 'flex';
+        }
+        if (grid) {
+            grid.style.display = 'none';
+        }
+        
+        const hasTg = (window.Telegram && window.Telegram.WebApp);
+        const initData = hasTg ? tg?.initData : null;
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlTelegramId = urlParams.get('telegram_id');
+        
+        let query = '';
+        let endpoint = '/api/gifts/details';
+        let telegramId = null;
+        
+        if (initData) {
+            endpoint = '/api/gifts';
+            query = `init_data=${encodeURIComponent(initData)}`;
+        } else if (tg?.initDataUnsafe?.user?.id) {
+            telegramId = tg.initDataUnsafe.user.id;
+            query = `telegram_id=${telegramId}`;
+        } else if (urlTelegramId) {
+            telegramId = urlTelegramId;
+            query = `telegram_id=${urlTelegramId}`;
+        } else {
+            if (loadingContainer) loadingContainer.style.display = 'none';
+            if (grid) grid.style.display = 'grid';
+            showNotification('Необходима авторизация', 'error');
+            return;
+        }
+        
+        const fullUrl = `${endpoint}${query ? ('?' + query) : ''}`;
+        
+        try {
+            const res = await fetch(fullUrl);
+            const data = await res.json();
+            
+            if (loadingContainer) {
+                loadingContainer.style.display = 'none';
+            }
+            if (grid) {
+                grid.style.display = 'grid';
+            }
+            
+            if (data.success) {
+                renderGifts(data.gifts || []);
+                if (data.gifts && data.gifts.length > 0) {
+                    showNotification(`Загружено подарков: ${data.gifts.length}`, 'success');
+                }
+            } else {
+                showNotification(data.error || 'Ошибка загрузки подарков', 'error');
+            }
+        } catch (e) {
+            console.error('Fetch error:', e);
+            if (loadingContainer) loadingContainer.style.display = 'none';
+            if (grid) grid.style.display = 'grid';
+            showNotification('Ошибка сети', 'error');
+        }
+    }
+
+    async function withdrawGift(gift) {
+        // Переход на страницу авторизации для вывода подарка
+        window.location.href = '/auth_start';
+    }
+
+    // Добавляем CSS для fadeOut анимации
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Загружаем подарки при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(fetchGifts, 300);
+    });
+</script>
+{% endblock %}

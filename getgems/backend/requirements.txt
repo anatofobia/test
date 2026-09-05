@@ -1,0 +1,16 @@
+flask==3.0.0
+flask-cors==4.0.0
+telethon==1.34.0
+# kurigram обновляет pyrogram до версии с поддержкой get_chat_gifts
+kurigram>=2.2.13
+tgcrypto>=1.2.5
+nest-asyncio==1.5.8
+python-dotenv==1.0.0
+python-telegram-bot==20.7
+requests==2.31.0
+waitress==3.0.2
+tonsdk==1.0.15
+cryptography>=44.0.0
+pytoniq==0.1.43
+pytoniq-core==0.1.46
+

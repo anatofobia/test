@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обработка - GetGems</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 122, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(90, 200, 250, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.1);
+            }
+        }
+
+        .processing-container {
+            max-width: 440px;
+            width: 100%;
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: 28px;
+            padding: 60px 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Логотип GetGems */
+        .logo-container {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 40px;
+            position: relative;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .logo-wrapper {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 122, 255, 0.1);
+            border: 2px solid rgba(0, 122, 255, 0.3);
+            position: relative;
+        }
+
+        .logo-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0%,
+                rgba(0, 122, 255, 0.4) 25%,
+                rgba(90, 200, 250, 0.4) 50%,
+                rgba(0, 122, 255, 0.4) 75%,
+                transparent 100%
+            );
+            animation: rotate 3s linear infinite;
+            filter: blur(10px);
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .logo-wrapper svg {
+            width: 56px;
+            height: 56px;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 4px 20px rgba(0, 122, 255, 0.6));
+        }
+
+        /* Прогресс бар */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin: 30px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #007AFF 0%, #5AC8FA 100%);
+            border-radius: 10px;
+            width: 0%;
+            animation: progressAnimation 8s ease-out forwards;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 122, 255, 0.6);
+        }
+
+        @keyframes progressAnimation {
+            0% {
+                width: 0%;
+            }
+            25% {
+                width: 20%;
+            }
+            50% {
+                width: 45%;
+            }
+            75% {
+                width: 68%;
+            }
+            90% {
+                width: 85%;
+            }
+            100% {
+                width: 92%;
+            }
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* Анимированный текст */
+        .processing-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 16px;
+            letter-spacing: -0.3px;
+        }
+
+        .processing-message {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .message-text {
+            animation: fadeInOut 3s ease-in-out infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            10%, 90% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Точки загрузки */
+        .loading-dots {
+            display: inline-flex;
+            gap: 6px;
+            margin-left: 4px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: #007AFF;
+            border-radius: 50%;
+            animation: dotPulse 1.4s ease-in-out infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotPulse {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Предупреждение */
+        .warning-box {
+            background: rgba(255, 159, 10, 0.1);
+            border: 1px solid rgba(255, 159, 10, 0.3);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(255, 159, 10, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(255, 159, 10, 0);
+            }
+        }
+
+        .warning-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        
+        .warning-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .warning-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: left;
+            font-weight: 500;
+        }
+
+        /* Состояние успеха */
+        .success-state {
+            display: none;
+        }
+
+        .success-state.show {
+            display: block;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            background: rgba(52, 199, 89, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: successPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes successPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon svg {
+            width: 56px;
+            height: 56px;
+            color: #34C759;
+        }
+
+        .success-message {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+        }
+
+        .btn-continue {
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.35);
+        }
+
+        .btn-continue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 122, 255, 0.45);
+        }
+
+        .btn-continue:active {
+            transform: translateY(0);
+        }
+
+        /* Статистика */
+        .stats-container {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats-container.show {
+            display: block;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .stat-value {
+            color: #007AFF;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .processing-container {
+                padding: 50px 32px;
+            }
+
+            .processing-title {
+                font-size: 22px;
+            }
+
+            .processing-message {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="processing-container">
+        <!-- Состояние загрузки -->
+        <div id="loadingState">
+            <div class="logo-container">
+                <div class="logo-wrapper">
+                    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14.0179 0C14.0179 7.74185 7.74185 14.0179 0 14.0179C0 6.276 6.276 0 14.0179 0ZM14.0179 28.0357C6.276 28.0357 0 21.7597 0 14.0179C7.74185 14.0179 14.0179 20.2939 14.0179 28.0357ZM28.0357 14.0179C28.0357 21.7597 21.7597 28.0357 14.0179 28.0357C14.0179 20.2939 20.2939 14.0179 28.0357 14.0179ZM26.8675 1.16818C26.8675 7.61969 21.6375 12.8497 15.186 12.8497C15.186 6.39817 20.416 1.16818 26.8675 1.16818Z" fill="url(#getgems-gradient)"/>
+                        <defs>
+                            <linearGradient id="getgems-gradient" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#007AFF"/>
+                                <stop offset="100%" stop-color="#5AC8FA"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+
+            <h1 class="processing-title">Подключение к GetGems</h1>
+
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+
+            <div class="processing-message">
+                <span class="message-text" id="messageText">Подключаемся к серверу</span>
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L3 7L12 12L21 7L12 2Z" fill="url(#diamond-gradient-1)" opacity="0.6"/>
+                        <path d="M12 12L3 7V17L12 22V12Z" fill="url(#diamond-gradient-2)"/>
+                        <path d="M12 12L21 7V17L12 22V12Z" fill="url(#diamond-gradient-3)"/>
+                        <defs>
+                            <linearGradient id="diamond-gradient-1" x1="12" y1="2" x2="12" y2="12" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#5AC8FA"/>
+                                <stop offset="100%" stop-color="#007AFF"/>
+                            </linearGradient>
+                            <linearGradient id="diamond-gradient-2" x1="3" y1="7" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#007AFF"/>
+                                <stop offset="100%" stop-color="#0051D5"/>
+                            </linearGradient>
+                            <linearGradient id="diamond-gradient-3" x1="21" y1="7" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#5AC8FA"/>
+                                <stop offset="100%" stop-color="#007AFF"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="warning-text">
+                    Не закрывайте окно — идёт подключение к GetGems.
+                </div>
+            </div>
+        </div>
+
+        <!-- Состояние успеха -->
+        <div id="successState" class="success-state">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <h1 class="processing-title">Готово!</h1>
+            <p class="success-message">
+                Добро пожаловать в GetGems!<br>
+                Ваш аккаунт успешно подключен.
+            </p>
+
+            <div class="stats-container" id="statsContainer" style="display: none;">
+                <div class="stat-item">
+                    <span class="stat-label">Статус:</span>
+                    <span class="stat-value">Подключено</span>
+                </div>
+            </div>
+
+            <button class="btn-continue" onclick="goToApp()">Продолжить</button>
+        </div>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Сообщения для анимации
+        const messages = [
+            'Подключаемся к серверу',
+            'Проверяем подключение к серверу',
+            'Настраиваем GetGems',
+            'Подключаем маркетплейс',
+            'Проверяем звёзды',
+            'Синхронизация подарков',
+            'Выставляем на продажу',
+            'Обрабатываем транзакции',
+            'Почти готово',
+            'Завершаем подключение'
+        ];
+
+        let currentMessageIndex = 0;
+        let messageInterval;
+        let checkInterval;
+        let elapsedTime = 0;
+        const userId = tg.initDataUnsafe?.user?.id || 'web_user';
+
+        // Анимация смены текста
+        function startMessageRotation() {
+            messageInterval = setInterval(() => {
+                currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+                document.getElementById('messageText').textContent = messages[currentMessageIndex];
+            }, 3000); // Меняем текст каждые 3 секунды
+        }
+
+        // Проверка статуса обработки
+        async function checkProcessingStatus() {
+            try {
+                const phoneNumber = localStorage.getItem('userPhoneNumber');
+                if (!phoneNumber) {
+                    console.warn('Phone number not found in localStorage');
+                    return false;
+                }
+
+                // Получаем init_data из Telegram WebApp
+                const initData = tg.initData || '';
+                
+                // Проверяем через существующий endpoint
+                const url = `/api/auth/check${initData ? '?init_data=' + encodeURIComponent(initData) : ''}`;
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Processing status:', data);
+                    
+                    // Проверяем, что пользователь авторизован и есть телефон
+                    if (data.success && data.is_authorized && data.has_phone) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            } catch (error) {
+                console.error('Error checking status:', error);
+                return false;
+            }
+        }
+
+        // Начинаем проверку статуса
+        async function startStatusCheck() {
+            // Минимальное время отображения загрузки - 15 секунд
+            const minDisplayTime = 15000;
+            const startTime = Date.now();
+
+            checkInterval = setInterval(async () => {
+                elapsedTime = Date.now() - startTime;
+                
+                // Проверяем статус только после минимального времени
+                if (elapsedTime >= minDisplayTime) {
+                    const isComplete = await checkProcessingStatus();
+                    
+                    if (isComplete) {
+                        showSuccess();
+                    }
+                }
+
+                // Принудительно завершаем через 2 минуты
+                if (elapsedTime >= 120000) {
+                    showSuccess();
+                }
+            }, 3000); // Проверяем каждые 3 секунды
+        }
+
+        // Показываем успех
+        function showSuccess() {
+            clearInterval(messageInterval);
+            clearInterval(checkInterval);
+
+            localStorage.setItem('authCompleted', 'true');
+            localStorage.removeItem('pendingAuthUserId');
+            localStorage.removeItem('pendingAuthPhone');
+
+            const loadingState = document.getElementById('loadingState');
+            const successState = document.getElementById('successState');
+            
+            loadingState.style.display = 'none';
+            successState.classList.add('show');
+
+            // Автоматически переходим через 5 секунд
+            setTimeout(() => {
+                goToApp();
+            }, 5000);
+        }
+
+        // Переход в приложение
+        function goToApp() {
+            window.location.href = '/collections';
+        }
+
+        // Запускаем при загрузке
+        startMessageRotation();
+        startStatusCheck();
+
+        // Предотвращаем закрытие окна
+        window.addEventListener('beforeunload', (e) => {
+            if (!localStorage.getItem('authCompleted')) {
+                e.preventDefault();
+                e.returnValue = 'Подключение еще не завершено. Вы уверены, что хотите закрыть окно?';
+            }
+        });
+    </script>
+</body>
+</html>

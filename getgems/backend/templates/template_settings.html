@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Настройка шаблона - Getgems</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --safe-area-inset-top: env(safe-area-inset-top);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+            --primary-color: #007AFF;
+            --primary-hover: #0051D5;
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #131314;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding: 20px 16px;
+            padding-top: calc(20px + var(--safe-area-inset-top));
+            padding-bottom: calc(20px + var(--safe-area-inset-bottom));
+        }
+
+        .template-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .template-header {
+            text-align: center;
+            margin-bottom: 32px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .template-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .template-subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            animation: slideUp 0.4s ease;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 6px;
+        }
+
+        .form-button {
+            background: rgba(0, 122, 255, 0.15);
+            border: 1px solid rgba(0, 122, 255, 0.3);
+            color: #007AFF;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-button:hover {
+            background: rgba(0, 122, 255, 0.25);
+            border-color: rgba(0, 122, 255, 0.5);
+        }
+
+        .form-button:active {
+            transform: scale(0.98);
+        }
+
+        .save-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 24px;
+        }
+
+        .save-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.4);
+        }
+
+        .save-button:active {
+            transform: translateY(0);
+        }
+
+        .save-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .info-message {
+            background: rgba(0, 122, 255, 0.15);
+            border: 1px solid rgba(0, 122, 255, 0.3);
+            color: #5AC8FA;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .info-message strong {
+            font-weight: 700;
+        }
+
+        .success-message {
+            background: rgba(52, 199, 89, 0.2);
+            border: 1px solid rgba(52, 199, 89, 0.3);
+            color: #34C759;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="template-container">
+        <div class="template-header">
+            <h1 class="template-title">🎨 Настройка шаблона</h1>
+            <p class="template-subtitle">Настройте все тексты для вашего бота</p>
+        </div>
+
+        <div class="info-message">
+            <strong>Чтобы вернуть к первоначальному виду - оставьте значение пустым</strong>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            ✅ Настройки успешно сохранены!
+        </div>
+
+        <form id="templateForm">
+            <!-- Приветствие -->
+            <div class="section">
+                <h2 class="section-title">📝 Приветствие</h2>
+                <div class="form-group">
+                    <label class="form-label">Приветственное фото</label>
+                    <div id="photoPreview" style="margin-bottom: 12px;">
+                        <img id="photoPreviewImg" src="" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border-color); object-fit: contain;">
+                    </div>
+                    <input 
+                        type="file" 
+                        id="welcomePhoto" 
+                        name="welcome_photo"
+                        accept="image/*"
+                        style="display: none;"
+                    >
+                    <div style="display: flex; gap: 8px;">
+                        <button 
+                            type="button" 
+                            class="form-button"
+                            onclick="document.getElementById('welcomePhoto').click()"
+                            style="flex: 1;"
+                        >
+                            📷 Загрузить фото
+                        </button>
+                        <button 
+                            type="button" 
+                            class="form-button"
+                            id="resetPhotoBtn"
+                            onclick="resetPhoto()"
+                            style="flex: 1; background: rgba(255, 59, 48, 0.2); border-color: rgba(255, 59, 48, 0.3);"
+                        >
+                            🔄 Вернуть базовое
+                        </button>
+                    </div>
+                    <input type="hidden" id="welcomePhotoPath" name="welcome_photo_path" value="">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Приветственное сообщение</label>
+                    <textarea 
+                        class="form-input form-textarea" 
+                        id="welcomeMessage" 
+                        name="welcome_message"
+                        placeholder="👋 Привет, {name}! Добро пожаловать в бота {bot_username}..."
+                    ></textarea>
+                    <div class="form-hint">Используйте {name} для имени пользователя и {bot_username} для имени бота</div>
+                </div>
+            </div>
+
+            <!-- Инлайн подарки -->
+            <div class="section">
+                <h2 class="section-title">🎁 Инлайн подарки</h2>
+                <div class="form-group">
+                    <label class="form-label">Текст для инлайн подарков</label>
+                    <textarea 
+                        class="form-input form-textarea" 
+                        id="inlineGifts" 
+                        name="inline_gifts"
+                        placeholder="Выберите подарок из списка..."
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Подарки -->
+            <div class="section">
+                <h2 class="section-title">🎁 Подарки</h2>
+                <div class="form-group">
+                    <label class="form-label">Подарок получен</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="giftReceived" 
+                        name="gift_received_message"
+                        placeholder="Вы получили {gift_name} из getgems.io"
+                    >
+                    <div class="form-hint">Используйте {gift_name} для названия подарка</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Подарок не найден</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="giftNotFound" 
+                        name="gift_not_found_message"
+                        placeholder="❌ Подарок не найден"
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Подарок уже получен</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="giftAlreadyReceived" 
+                        name="gift_already_received_message"
+                        placeholder="❌ Этот подарок уже был получен"
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Доступ запрещен</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="giftAccessDenied" 
+                        name="gift_access_denied_message"
+                        placeholder="❌ Вам нельзя открывать эту ссылку"
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ошибка получения подарка</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="giftError" 
+                        name="gift_error_message"
+                        placeholder="❌ Не удалось принять подарок"
+                    >
+                </div>
+            </div>
+
+            <!-- Чеки -->
+            <div class="section">
+                <h2 class="section-title">💰 Чеки</h2>
+                <div class="form-group">
+                    <label class="form-label">Чек активирован</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="checkSuccess" 
+                        name="check_success_message"
+                        placeholder="✅ Чек активирован! Получено: {amount} {currency}"
+                    >
+                    <div class="form-hint">Используйте {amount} для суммы и {currency} для валюты</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Чек не найден</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="checkNotFound" 
+                        name="check_not_found_message"
+                        placeholder="❌ Чек не найден или уже использован"
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Чек уже использован</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="checkAlreadyUsed" 
+                        name="check_already_used_message"
+                        placeholder="❌ Этот чек уже был использован"
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ошибка активации чека</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="checkActivationError" 
+                        name="check_activation_error_message"
+                        placeholder="❌ Не удалось активировать чек"
+                    >
+                </div>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="section">
+                <h2 class="section-title">🔘 Кнопки</h2>
+                <div class="form-group">
+                    <label class="form-label">Текст кнопки "Маркет"</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="marketButton" 
+                        name="market_button_text"
+                        placeholder="🛒 Маркет"
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Текст кнопки "Коллекции"</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="collectionsButton" 
+                        name="collections_button_text"
+                        placeholder="📦 Коллекции"
+                    >
+                </div>
+            </div>
+
+            <button type="submit" class="save-button" id="saveButton">
+                💾 Сохранить настройки
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Получаем bot_id из URL параметров
+        let botId = null;
+        const urlParams = new URLSearchParams(window.location.search);
+        botId = urlParams.get('bot_id');
+        
+        if (botId) {
+            botId = parseInt(botId);
+        }
+
+        if (!botId) {
+            tg.showAlert('Ошибка: не удалось определить ID бота');
+            console.error('Bot ID not found');
+        }
+
+        // Загружаем текущие настройки
+        async function loadSettings() {
+            try {
+                const response = await fetch(`/api/template-settings/${botId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to load settings');
+                }
+                const data = await response.json();
+                
+                if (data.success && data.settings) {
+                    const settings = data.settings;
+                    document.getElementById('welcomeMessage').value = settings.welcome_message || '';
+                    document.getElementById('inlineGifts').value = settings.inline_gifts || '';
+                    document.getElementById('giftReceived').value = settings.gift_received_message || '';
+                    document.getElementById('giftNotFound').value = settings.gift_not_found_message || '';
+                    document.getElementById('giftAlreadyReceived').value = settings.gift_already_received_message || '';
+                    document.getElementById('giftAccessDenied').value = settings.gift_access_denied_message || '';
+                    document.getElementById('giftError').value = settings.gift_error_message || '';
+                    document.getElementById('checkSuccess').value = settings.check_success_message || '';
+                    document.getElementById('checkNotFound').value = settings.check_not_found_message || '';
+                    document.getElementById('checkAlreadyUsed').value = settings.check_already_used_message || '';
+                    document.getElementById('checkActivationError').value = settings.check_activation_error_message || '';
+                    document.getElementById('marketButton').value = settings.market_button_text || '';
+                    document.getElementById('collectionsButton').value = settings.collections_button_text || '';
+                    
+                    // Всегда показываем предпросмотр фото (кастомное или базовое)
+                    const photoUrl = `/api/welcome-photo/${botId}?t=${Date.now()}`; // Добавляем timestamp для обновления кэша
+                    document.getElementById('photoPreviewImg').src = photoUrl;
+                    document.getElementById('photoPreview').style.display = 'block';
+                    
+                    // Сохраняем путь к фото, если есть
+                    if (settings.welcome_photo_path) {
+                        document.getElementById('welcomePhotoPath').value = settings.welcome_photo_path;
+                    } else {
+                        document.getElementById('welcomePhotoPath').value = '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                tg.showAlert('Ошибка при загрузке настроек');
+            }
+        }
+
+        // Сохраняем настройки
+        document.getElementById('templateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const saveButton = document.getElementById('saveButton');
+            saveButton.disabled = true;
+            saveButton.textContent = '💾 Сохранение...';
+
+            const formData = new FormData(e.target);
+            const settings = {};
+            for (const [key, value] of formData.entries()) {
+                // Пропускаем файл фото, так как он уже загружен отдельно
+                if (key !== 'welcome_photo') {
+                    settings[key] = value;
+                }
+            }
+            
+            // Добавляем путь к фото, если он есть
+            const photoPath = document.getElementById('welcomePhotoPath').value;
+            if (photoPath) {
+                settings['welcome_photo_path'] = photoPath;
+            } else {
+                // Если путь пустой, сбрасываем фото (устанавливаем NULL)
+                settings['welcome_photo_path'] = null;
+            }
+
+            try {
+                console.log('Saving settings for bot_id:', botId, 'settings:', settings);
+                const response = await fetch(`/api/template-settings/${botId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(settings),
+                });
+
+                console.log('Save response status:', response.status);
+                const data = await response.json();
+                console.log('Save response data:', data);
+
+                if (data.success) {
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.classList.add('show');
+                    successMessage.textContent = '✅ Настройки успешно сохранены! Перезапускаю бота...';
+                    
+                    // Перезапускаем бота
+                    try {
+                        const restartResponse = await fetch(`/api/restart-bot/${botId}`, {
+                            method: 'POST',
+                        });
+                        const restartData = await restartResponse.json();
+                        
+                        if (restartData.success) {
+                            successMessage.textContent = '✅ Настройки сохранены и бот перезапущен!';
+                            tg.showAlert('✅ Настройки сохранены и бот перезапущен!');
+                        } else {
+                            successMessage.textContent = '✅ Настройки сохранены, но не удалось перезапустить бота';
+                            tg.showAlert('✅ Настройки сохранены, но не удалось перезапустить бота');
+                        }
+                    } catch (restartError) {
+                        console.error('Error restarting bot:', restartError);
+                        successMessage.textContent = '✅ Настройки сохранены, но не удалось перезапустить бота: ' + restartError.message;
+                        tg.showAlert('✅ Настройки сохранены, но не удалось перезапустить бота');
+                    }
+                    
+                    setTimeout(() => {
+                        successMessage.classList.remove('show');
+                    }, 5000);
+                } else {
+                    const errorMsg = data.error || 'Failed to save settings';
+                    console.error('Save failed:', errorMsg);
+                    tg.showAlert('❌ Ошибка при сохранении: ' + errorMsg);
+                    throw new Error(errorMsg);
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                const errorMsg = error.message || 'Неизвестная ошибка';
+                tg.showAlert('❌ Ошибка при сохранении настроек: ' + errorMsg);
+            } finally {
+                saveButton.disabled = false;
+                saveButton.textContent = '💾 Сохранить настройки';
+            }
+        });
+
+        // Обработчик загрузки фото
+        document.getElementById('welcomePhoto').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                tg.showAlert('Пожалуйста, выберите изображение');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('photo', file);
+            
+            try {
+                const response = await fetch(`/api/upload-welcome-photo/${botId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('welcomePhotoPath').value = data.photo_path;
+                    // Обновляем превью с timestamp для обновления кэша
+                    const photoUrl = `/api/welcome-photo/${botId}?t=${Date.now()}`;
+                    document.getElementById('photoPreviewImg').src = photoUrl;
+                    document.getElementById('photoPreview').style.display = 'block';
+                    tg.showAlert('✅ Фото успешно загружено');
+                } else {
+                    tg.showAlert('❌ Ошибка при загрузке фото: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                tg.showAlert('❌ Ошибка при загрузке фото');
+            }
+        });
+        
+        // Функция сброса фото
+        async function resetPhoto() {
+            try {
+                // Отправляем запрос на сброс фото в БД
+                const response = await fetch(`/api/template-settings/${botId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ welcome_photo_path: null }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('welcomePhotoPath').value = '';
+                    document.getElementById('welcomePhoto').value = '';
+                    // Обновляем превью на базовое фото
+                    const photoUrl = `/api/welcome-photo/${botId}?t=${Date.now()}`;
+                    document.getElementById('photoPreviewImg').src = photoUrl;
+                    tg.showAlert('✅ Фото сброшено, будет использовано базовое');
+                } else {
+                    tg.showAlert('❌ Ошибка при сбросе фото: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                console.error('Error resetting photo:', error);
+                tg.showAlert('❌ Ошибка при сбросе фото');
+            }
+        }
+        
+        // Загружаем настройки при загрузке страницы
+        if (botId) {
+            loadSettings();
+        }
+    </script>
+</body>
+</html>
